@@ -1,5 +1,5 @@
 ## Title: |cffbf0261Lock|r|cffffffffPort|r
-## Notes: A small helper for Warlock Summons
+## Notes: Warlock Raid Summon Assistant
 ## Version: 1.0
 ## Author: |cff02bf02Gurky|r
 ## Interface: 11200

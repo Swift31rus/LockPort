@@ -22,7 +22,6 @@ function LockPort_EventFrame_OnLoad()
     this:RegisterEvent("CHAT_MSG_ADDON")
     this:RegisterEvent("CHAT_MSG_RAID")
 	this:RegisterEvent("CHAT_MSG_RAID_LEADER")
-    this:RegisterEvent("CHAT_MSG_SAY")
     this:RegisterEvent("CHAT_MSG_YELL")
     this:RegisterEvent("CHAT_MSG_WHISPER")
     this:RegisterEvent("CHAT_MSG_PARTY")
@@ -46,7 +45,7 @@ function LockPort_EventFrame_OnEvent()
 		LockPort_Initialize()
 		LockPort_RequestFrame_Header:SetFont("Fonts\\FRIZQT__.TTF", 10, "OUTLINE, ")
 
-	elseif event == "CHAT_MSG_SAY" or event == "CHAT_MSG_RAID"  or event == "CHAT_MSG_RAID_LEADER" or event == "CHAT_MSG_YELL" or event == "CHAT_MSG_WHISPER" or event == "CHAT_MSG_PARTY" then
+	elseif event == "CHAT_MSG_RAID"  or event == "CHAT_MSG_RAID_LEADER" or event == "CHAT_MSG_YELL" or event == "CHAT_MSG_WHISPER" or event == "CHAT_MSG_PARTY" then
 		
 		if string.find(arg1, "^123") then
 			SendAddonMessage(MSG_PREFIX_ADD, arg2, "RAID")

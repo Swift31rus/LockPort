@@ -2,7 +2,8 @@ local LockPortOptions_DefaultSettings = {
 	whisper = true,
 	zone = true,
 	zone = true,
-	sound = true
+	sound = true,
+	soul = true
 }
 
 local function LockPort_Initialize()
@@ -332,6 +333,14 @@ function LockPort_SlashCommand( msg )
 			LockPortOptions["sound"] = true
 			DEFAULT_CHAT_FRAME:AddMessage("|cffCB3480Lock|r|cffffffffPort|r - sound: |cff00ff00enabled|r")
 		end
+	elseif msg == "soul" then
+		if LockPortOptions["soul"] == true then
+			LockPortOptions["soul"] = false
+			DEFAULT_CHAT_FRAME:AddMessage("|cffCB3480Lock|r|cffffffffPort|r - soul: |cffff0000disabled|r")
+		elseif LockPortOptions["soul"] == false then
+			LockPortOptions["soul"] = true
+			DEFAULT_CHAT_FRAME:AddMessage("|cffCB3480Lock|r|cffffffffPort|r - soul: |cff00ff00enabled|r")
+		end
 	else
 	
 		if LockPort_RequestFrame:IsVisible() then
@@ -377,4 +386,14 @@ function LockPort_getRaidMembers()
 		
 	    end
 	end
+end
+
+--Soul Stone
+function SoulMonitor_OnEvent(event, arg1, arg2) 
+   if (LockPortOptions.soul and (event == "SPELLCAST_START")) then
+     if ((arg1 == "Soulstone Resurrection") and LockPortOptions.soul) then
+		SendChatMessage("I am saving %t's soul in a soulstone.", "SAY")
+		SendChatMessage("You have been Soul Stoned.", "WHISPER", nil, GetUnitName("target"))
+	   end
+   end
 end

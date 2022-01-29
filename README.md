@@ -10,6 +10,7 @@
 - CTRL + Left click to target the player.
 - Right click to remove.
 - If no player is on the list the frame is hidden again (type /LockPort to manually show).
+- The addon will also anounce when you cast Soulstone Resurrection on another player. It will also anounce this in Say and Whisper.
 
 Options:
 
@@ -18,6 +19,7 @@ Options:
 - /LockPort zone - Enables or Disables including Zone information in summoning messages.
 - /LockPort whispers - Enables or Disables whispering the target when summoning.
 - /LockPort sound - Enables or Disables sound for new summon requests.
+- /LockPort soul - Enables or Disables messages for soul stones.
 
 ## How it looks:
 ![unknown](https://user-images.githubusercontent.com/90982783/151510149-e143f93f-ea5a-455a-9f51-e374f127b933.png)

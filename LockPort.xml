@@ -4,9 +4,11 @@
 		<Scripts>
 			<OnLoad>
 				LockPort_EventFrame_OnLoad();
+				this:RegisterEvent("SPELLCAST_START");
 			</OnLoad>
 			<OnEvent>
 				LockPort_EventFrame_OnEvent();
+				SoulMonitor_OnEvent(event, arg1, arg2);
 			</OnEvent>
 		</Scripts>
 	</Frame>

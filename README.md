@@ -20,4 +20,4 @@ Options:
 - /LockPort sound - Enables or Disables sound for new summon requests.
 
 ## How it looks:
-![unknown](https://user-images.githubusercontent.com/90982783/151510149-e143f93f-ea5a-455a-9f51-e374f127b933.png)
+![image](https://user-images.githubusercontent.com/90982783/151677381-e0d92a3b-3d0a-49eb-8842-1e626441951d.png)

@@ -1,6 +1,8 @@
 local LockPortOptions_DefaultSettings = {
 	whisper = true,
-	zone = true
+	zone = true,
+	zone = true,
+	sound = true
 }
 
 local function LockPort_Initialize()
@@ -17,7 +19,7 @@ end
 
 function LockPort_EventFrame_OnLoad()
 
-	DEFAULT_CHAT_FRAME:AddMessage(string.format("|cffbf0261Lock|r|cffffffffPort|r version %s by %s", GetAddOnMetadata("LockPort", "Version"), GetAddOnMetadata("LockPort", "Author")));
+	DEFAULT_CHAT_FRAME:AddMessage(string.format("|cffCB3480Lock|r|cffffffffPort|r version %s by %s", GetAddOnMetadata("LockPort", "Version"), GetAddOnMetadata("LockPort", "Author")));
     this:RegisterEvent("VARIABLES_LOADED");
     this:RegisterEvent("CHAT_MSG_ADDON")
     this:RegisterEvent("CHAT_MSG_RAID")
@@ -28,14 +30,13 @@ function LockPort_EventFrame_OnLoad()
     
 	SlashCmdList["LockPort"] = LockPort_SlashCommand
 	SLASH_LockPort1 = "/LockPort"
-	SLASH_LockPort2 = "/lp"
 	
 	MSG_PREFIX_ADD	= "LPAdd"
 	MSG_PREFIX_REMOVE	= "LPRemove"
 	LockPortDB = {}
 	
 	--localization
-	LockPortLoc_Header = "|cffbf0261Lock|r|cffffffffPort|r v" .. GetAddOnMetadata("LockPort", "Version")
+	LockPortLoc_Header = "|cffCB3480Lock|r|cffffffffPort|r v" .. GetAddOnMetadata("LockPort", "Version")
 end
 
 function LockPort_EventFrame_OnEvent()
@@ -59,13 +60,21 @@ function LockPort_EventFrame_OnEvent()
 		if string.find(arg1, "^summon") then
 			SendAddonMessage(MSG_PREFIX_ADD, arg2, "RAID")
 		end
+		if string.find(arg1, "^456") then
+			SendAddonMessage(MSG_PREFIX_ADD, arg2, "RAID")
+		end
 
 	elseif event == "CHAT_MSG_ADDON" then
-		if arg1 == MSG_PREFIX_ADD then
+		if arg1 == MSG_PREFIX_ADD and LockPortOptions.sound then
 			if not LockPort_hasValue(LockPortDB, arg2) then
 				table.insert(LockPortDB, arg2)
 				LockPort_UpdateList()
-				PlaySoundFile("Sound\\Character\\PlayerRoars\\CharacterRoarsUndeadMale.wav")
+				PlaySoundFile("Sound\\Creature\\Necromancer\\NecromancerReady1.wav")
+			end
+		elseif arg1 == MSG_PREFIX_ADD and not LockPortOptions.sound then
+			if not LockPort_hasValue(LockPortDB, arg2) then
+				table.insert(LockPortDB, arg2)
+				LockPort_UpdateList()
 			end
 		elseif arg1 == MSG_PREFIX_REMOVE then
 			if LockPort_hasValue(LockPortDB, arg2) then
@@ -112,7 +121,7 @@ function LockPort_NameListButton_OnClick(button)
 			end
 			
 		else
-			DEFAULT_CHAT_FRAME:AddMessage("|cffbf0261Lock|r|cffffffffPort|r - no Raid found")
+			DEFAULT_CHAT_FRAME:AddMessage("|cffCB3480Lock|r|cffffffffPort|r - no Raid found")
 		end
 		
 	elseif button == "LeftButton" and not IsControlKeyDown() then
@@ -162,15 +171,15 @@ function LockPort_NameListButton_OnClick(button)
 						end
 					end
 				else
-					DEFAULT_CHAT_FRAME:AddMessage("|cffbf0261Lock|r|cffffffffPort|r - Player is in combat")
+					DEFAULT_CHAT_FRAME:AddMessage("|cffCB3480Lock|r|cffffffffPort|r - Player is in combat")
 				end
 			else
-				DEFAULT_CHAT_FRAME:AddMessage("|cffbf0261Lock|r|cffffffffPort|r - Player " .. tostring(name) .. " not found in raid. UnitID: " .. tostring(UnitID))
+				DEFAULT_CHAT_FRAME:AddMessage("|cffCB3480Lock|r|cffffffffPort|r - Player " .. tostring(name) .. " not found in raid. UnitID: " .. tostring(UnitID))
 				SendAddonMessage(MSG_PREFIX_REMOVE, name, "RAID")
 				LockPort_UpdateList()
 			end
 		else
-			DEFAULT_CHAT_FRAME:AddMessage("|cffbf0261Lock|r|cffffffffPort|r - no Raid found")
+			DEFAULT_CHAT_FRAME:AddMessage("|cffCB3480Lock|r|cffffffffPort|r - no Raid found")
 		end
 	elseif button == "RightButton" then
 		for i, v in ipairs (LockPortDB) do
@@ -287,12 +296,13 @@ end
 function LockPort_SlashCommand( msg )
 
 	if msg == "help" then
-		DEFAULT_CHAT_FRAME:AddMessage("|cffbf0261Lock|r|cffffffffPort|r usage:")
-		DEFAULT_CHAT_FRAME:AddMessage("/lp or /LockPort { help | show | zone | whisper }")
+		DEFAULT_CHAT_FRAME:AddMessage("|cffCB3480Lock|r|cffffffffPort|r usage:")
+		DEFAULT_CHAT_FRAME:AddMessage("/LockPort { help | show | zone | whisper | sound }")
 		DEFAULT_CHAT_FRAME:AddMessage(" - |cff9482c9help|r: prints out this help")
 		DEFAULT_CHAT_FRAME:AddMessage(" - |cff9482c9show|r: shows the current summon list")
 		DEFAULT_CHAT_FRAME:AddMessage(" - |cff9482c9zone|r: toggles zoneinfo in /ra and /w")
 		DEFAULT_CHAT_FRAME:AddMessage(" - |cff9482c9whisper|r: toggles the usage of /w")
+		DEFAULT_CHAT_FRAME:AddMessage(" - |cff9482c9sound|r: toggles the sound")
 		DEFAULT_CHAT_FRAME:AddMessage("To drag the frame use shift + left mouse button")
 	elseif msg == "show" then
 		for i, v in ipairs(LockPortDB) do
@@ -301,18 +311,26 @@ function LockPort_SlashCommand( msg )
 	elseif msg == "zone" then
 		if LockPortOptions["zone"] == true then
 			LockPortOptions["zone"] = false
-			DEFAULT_CHAT_FRAME:AddMessage("|cffbf0261Lock|r|cffffffffPort|r - zoneinfo: |cffff0000disabled|r")
+			DEFAULT_CHAT_FRAME:AddMessage("|cffCB3480Lock|r|cffffffffPort|r - zoneinfo: |cffff0000disabled|r")
 		elseif LockPortOptions["zone"] == false then
 			LockPortOptions["zone"] = true
-			DEFAULT_CHAT_FRAME:AddMessage("|cffbf0261Lock|r|cffffffffPort|r - zoneinfo: |cff00ff00enabled|r")
+			DEFAULT_CHAT_FRAME:AddMessage("|cffCB3480Lock|r|cffffffffPort|r - zoneinfo: |cff00ff00enabled|r")
 		end
 	elseif msg == "whisper" then
 		if LockPortOptions["whisper"] == true then
 			LockPortOptions["whisper"] = false
-			DEFAULT_CHAT_FRAME:AddMessage("|cffbf0261Lock|r|cffffffffPort|r - whisper: |cffff0000disabled|r")
+			DEFAULT_CHAT_FRAME:AddMessage("|cffCB3480Lock|r|cffffffffPort|r - whisper: |cffff0000disabled|r")
 		elseif LockPortOptions["whisper"] == false then
 			LockPortOptions["whisper"] = true
-			DEFAULT_CHAT_FRAME:AddMessage("|cffbf0261Lock|r|cffffffffPort|r - whisper: |cff00ff00enabled|r")
+			DEFAULT_CHAT_FRAME:AddMessage("|cffCB3480Lock|r|cffffffffPort|r - whisper: |cff00ff00enabled|r")
+		end
+	elseif msg == "sound" then
+		if LockPortOptions["sound"] == true then
+			LockPortOptions["sound"] = false
+			DEFAULT_CHAT_FRAME:AddMessage("|cffCB3480Lock|r|cffffffffPort|r - sound: |cffff0000disabled|r")
+		elseif LockPortOptions["sound"] == false then
+			LockPortOptions["sound"] = true
+			DEFAULT_CHAT_FRAME:AddMessage("|cffCB3480Lock|r|cffffffffPort|r - sound: |cff00ff00enabled|r")
 		end
 	else
 	

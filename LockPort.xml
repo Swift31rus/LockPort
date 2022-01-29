@@ -79,7 +79,7 @@
 		<Color r="1" g="1" b="1"/>
 	</Font>
 	
-	<Frame name="LockPort_RequestFrame" frameStrata="DIALOG" toplevel="true" parent="UIParent" movable="true" enableMouse="true" hidden="true" clampedToScreen="true">
+	<Frame name="LockPort_RequestFrame" frameStrata="LOW" toplevel="true" parent="UIParent" movable="true" enableMouse="true" hidden="true" clampedToScreen="true">
 		<Size>
 			<AbsDimension x="130" y="180"/>
 		</Size>
@@ -103,8 +103,9 @@
 				</FontString>
 			</Layer>
 		</Layers>
-		<Backdrop bgFile="Interface\DialogFrame\UI-DialogBox-Background" edgeFile="Interface\Tooltips\UI-Tooltip-Border" tile="true">			<BackgroundInsets>
-				<AbsInset bottom="4" left="4" right="4" top="4"></AbsInset>
+		<Backdrop bgFile="Interface\DialogFrame\UI-DialogBox-Background" edgeFile="Interface\AddOns\LockPort\img\border" tile="true">			
+			<BackgroundInsets>
+				<AbsInset bottom="2" left="2" right="2" top="2"></AbsInset>
 			</BackgroundInsets>
 			<TileSize>
 				<AbsValue val="32"></AbsValue>
@@ -112,6 +113,9 @@
 			<EdgeSize>
 				<AbsValue val="16"></AbsValue>
 			</EdgeSize>
+			<BorderColor>
+			<Color a="0" r="1" g="1" b="1" />
+			</BorderColor>
 		</Backdrop>
 		<Frames>
 			<Button name="LockPort_NameList1" inherits="LockPort_NameListButton" id="1" hidden="true">

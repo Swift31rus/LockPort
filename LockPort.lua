@@ -477,6 +477,7 @@ function LockPort:Curse()
 				CastSpellByName(spell)
 			else
 				self:Print(L["There are still curses missing but you already casted a more important curse"])
+				print(spell)
 			end
 		else
 			self:Print(L["All curses are present."])
@@ -580,7 +581,12 @@ function LockPort:WarlocksAreMoreImportant()
 	if mages > warlocks then
 		result = false -- there are more stupid mages than warlocks
 	end
-	
+	if mages == warlocks then
+		result = true -- there are more stupid mages than warlocks
+	end
+	if warlocks > mages then
+		result = true -- there are more stupid mages than warlocks
+	end	
 	return result
 end
 
@@ -589,28 +595,6 @@ function LockPort:GetMostImportantMissingCurse()
 	local curse = nil
 	local priority = 0
 	
-	if LockPort:WarlocksAreMoreImportant() then
-		if not recklessnessException[target] and not LockPort:HasRecklessness() then
-			curse = BS["Curse of Recklessness"]
-			priority = cursePriority[BS["Curse of Recklessness"]]
-		end
-		if LockPort:HasRecklessness() and not LockPort:HasShadows() then
-			curse = BS["Curse of Shadow"]
-			priority = cursePriority[BS["Curse of Shadow"]]
-		end
-		if LockPort:HasRecklessness() and LockPort:HasShadows() and not LockPort:HasElements() then
-			curse = BS["Curse of the Elements"]
-			priority = cursePriority[BS["Curse of the Elements"]]
-		end
-		if LockPort:HasRecklessness() and LockPort:HasElements() and LockPort:HasShadows() and not LockPort:HasDoom() then
-			curse = BS["Curse of Doom"]
-			priority = cursePriority[BS["Curse of Doom"]]
-		end
-		if tongueTarget[target] and not LockPort:HasTongues() then
-			curse = BS["Curse of Tongues"]
-			priority = cursePriority[BS["Curse of Tongues"]]
-		end
-	else
 		if not recklessnessException[target] and not LockPort:HasRecklessness() then
 			curse = BS["Curse of Recklessness"]
 			priority = cursePriority[BS["Curse of Recklessness"]]
@@ -631,7 +615,6 @@ function LockPort:GetMostImportantMissingCurse()
 			curse = BS["Curse of Tongues"]
 			priority = cursePriority[BS["Curse of Tongues"]]
 		end
-	end
 	
 	return curse
 end

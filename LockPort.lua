@@ -415,7 +415,7 @@ local BB = AceLibrary("Babble-Boss-2.2")
 local BS = AceLibrary("Babble-Spell-2.2")
 
 
-LockPort = AceLibrary("AceAddon-2.0"):new("AceEvent-2.0", "AceConsole-2.0", "AceModuleCore-2.0", "AceDB-2.0", "AceDebug-2.0", "FuBarPlugin-2.0")
+LockPort = AceLibrary("AceAddon-2.0"):new("AceEvent-2.0", "AceConsole-2.0", "AceModuleCore-2.0", "AceDB-2.0", "AceDebug-2.0")
 LockPort.revision = 2
 
 LockPort.defaultDB = {

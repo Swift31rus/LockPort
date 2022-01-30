@@ -11,7 +11,7 @@
 - Right click to remove.
 - If no player is on the list the frame is hidden again (type /LockPort to manually show).
 - The addon will also anounce when you cast Soulstone Resurrection on another player. It will also anounce this in Say and Whisper.
-- If using curse ot cursebolt macros it will auto assign the curse based on priority, it will also take into account if the curse has already been applied and go to the next on the list. The order of the priority is as follows Recklessness > Elements > Shadow > Doom
+- If using **curse** or **cursebolt** macros it will auto assign the curse based on priority, it will also take into account if the curse has already been applied and go to the next on the list. The order of the priority is as follows Recklessness > Elements > Shadow > Doom
 
 Options:
 

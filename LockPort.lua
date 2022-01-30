@@ -477,7 +477,6 @@ function LockPort:Curse()
 				CastSpellByName(spell)
 			else
 				self:Print(L["There are still curses missing but you already casted a more important curse"])
-				print(spell)
 			end
 		else
 			self:Print(L["All curses are present."])

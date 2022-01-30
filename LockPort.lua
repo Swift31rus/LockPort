@@ -298,12 +298,14 @@ function LockPort_SlashCommand( msg )
 
 	if msg == "help" then
 		DEFAULT_CHAT_FRAME:AddMessage("|cffCB3480Lock|r|cffffffffPort|r usage:")
-		DEFAULT_CHAT_FRAME:AddMessage("/LockPort { help | show | zone | whisper | sound }")
+		DEFAULT_CHAT_FRAME:AddMessage("/LockPort { help | show | zone | whisper | sound | curse | cursebolt }")
 		DEFAULT_CHAT_FRAME:AddMessage(" - |cff9482c9help|r: prints out this help")
 		DEFAULT_CHAT_FRAME:AddMessage(" - |cff9482c9show|r: shows the current summon list")
 		DEFAULT_CHAT_FRAME:AddMessage(" - |cff9482c9zone|r: toggles zoneinfo in /ra and /w")
 		DEFAULT_CHAT_FRAME:AddMessage(" - |cff9482c9whisper|r: toggles the usage of /w")
 		DEFAULT_CHAT_FRAME:AddMessage(" - |cff9482c9sound|r: toggles the sound")
+		DEFAULT_CHAT_FRAME:AddMessage(" - |cff9482c9curse|r: Cast curse based on priority and if already exists. \n    Macro: |cfB34DFFf/LockPort curse|r")
+		DEFAULT_CHAT_FRAME:AddMessage(" - |cff9482c9cursebolt|r: Casts Shadow Bolt if all curses are present. \n    Macro: |cfB34DFFf/LockPort curse cursebolt|r")
 		DEFAULT_CHAT_FRAME:AddMessage("To drag the frame use shift + left mouse button")
 	elseif msg == "show" then
 		for i, v in ipairs(LockPortDB) do
@@ -341,6 +343,11 @@ function LockPort_SlashCommand( msg )
 			LockPortOptions["soul"] = true
 			DEFAULT_CHAT_FRAME:AddMessage("|cffCB3480Lock|r|cffffffffPort|r - soul: |cff00ff00enabled|r")
 		end
+	elseif msg == "curse" then
+		LockPort:Curse()
+	elseif msg == "cursebolt" then
+		LockPort:CurseOrShadowbolt()
+
 	else
 	
 		if LockPort_RequestFrame:IsVisible() then
@@ -396,4 +403,253 @@ function SoulMonitor_OnEvent(event, arg1, arg2)
 		SendChatMessage("You have been Soul Stoned.", "WHISPER", nil, GetUnitName("target"))
 	   end
    end
+end
+
+-- Curses
+
+
+-- Initialization
+
+local L = AceLibrary("AceLocale-2.2"):new("LockPort")
+local BB = AceLibrary("Babble-Boss-2.2")
+local BS = AceLibrary("Babble-Spell-2.2")
+
+
+LockPort = AceLibrary("AceAddon-2.0"):new("AceEvent-2.0", "AceConsole-2.0", "AceModuleCore-2.0", "AceDB-2.0", "AceDebug-2.0", "FuBarPlugin-2.0")
+LockPort.revision = 2
+
+LockPort.defaultDB = {
+	posx = nil,
+	posy = nil,
+	visible = nil,
+}
+
+function LockPort:OnInitialize()
+
+end
+
+function LockPort:OnEnable()
+	self:RegisterEvent("SpellStatus_SpellCastInstant")
+	self:RegisterEvent("CHAT_MSG_SPELL_SELF_DAMAGE")
+	self:RegisterEvent("CHAT_MSG_COMBAT_HOSTILE_DEATH")
+end
+
+function LockPort:OnDisable()
+
+end
+
+-- Variables
+
+-- targets where curse of tongues should be used
+local tongueTarget = {
+	[L["Flamewaker Priest"]] = true,
+	[BB["The Prophet Skeram"]] = true,
+	[L["Giant Eye Tentacle"]] = true
+}
+
+-- targets where curse of recklessness should not be used
+local recklessnessException = {
+	[BB["Battleguard Sartura"]] = true,
+	[BB["Patchwerk"]] = true,
+}
+
+local cursePriority = {
+	[BS["Curse of Tongues"]] = 0,
+	[BS["Curse of Shadow"]] = 3,
+	[BS["Curse of the Elements"]] = 2,
+	[BS["Curse of Recklessness"]] = 1,
+	[BS["Curse of Weakness"]] = 0,
+	[BS["Curse of Agony"]] = 0,
+	[BS["Curse of Doom"]] = 0,
+	[BS["Curse of Exhaustion"]] = 0,
+}
+
+local curseTarget = nil
+local curseTime = nil
+local curseCasted = nil
+
+-- Slashcommand Handlers
+function LockPort:Curse()
+		local spell = self:GetMostImportantMissingCurse()
+
+		if spell then
+			if not (curseCasted and cursePriority[curseCasted] < cursePriority[spell]) then
+				CastSpellByName(spell)
+			else
+				self:Print(L["There are still curses missing but you already casted a more important curse"])
+				print(spell)
+			end
+		else
+			self:Print(L["All curses are present."])
+		end
+	end
+
+function LockPort:CurseOrShadowbolt()
+		local spell = self:GetMostImportantMissingCurse()
+
+		if spell then
+			if not (curseCasted and cursePriority[curseCasted] < cursePriority[spell]) then
+				CastSpellByName(spell)
+			else
+				--self:Print(L["There are still curses missing but you already casted a more important curse"])
+				CastSpellByName(BS["Shadow Bolt"])
+			end
+		else
+			CastSpellByName(BS["Shadow Bolt"])
+		end
+	end
+
+-- Event Handlers
+function LockPort:CHAT_MSG_SPELL_SELF_DAMAGE(msg)
+	local start, ending, userspell, target = string.find(msg, L["Your Curse of (.+) was resisted by (.+)."])
+	if userspell and target then
+		curseTarget = nil
+		curseTime = nil
+		curseCasted = nil
+		self:Print(string.format(L["Your Curse of %s was |cffff0000resisted|r by %s."], userspell, target))
+    end
+	
+	local start, ending, curse, target = string.find(msg, L["^Curse of (.+) fades from ([%w%s:]+)."])
+    if target and target == curseTarget and curseCasted == BS[string.format("Curse of %s", curse)] then
+        curseTarget = nil
+		curseTime = nil
+		curseCasted = nil
+		
+		self:Print(L["Your curse has faded."])
+    end
+end
+
+function LockPort:CHAT_MSG_COMBAT_HOSTILE_DEATH(msg)
+	if curseTarget and (msg == string.format(UNITDIESOTHER, curseTarget) or msg == string.format(L["You have slain %s!"], curseTarget)) then
+		curseTarget = nil
+		curseTime = nil
+		curseCasted = nil
+	end
+end
+
+-- Utility Functions
+function LockPort:CastedCurse(curse)
+	if curse then		
+		curseTarget = UnitName("target")
+		curseTime = GetTime()
+		curseCasted = curse
+	end
+end
+
+function LockPort:HasDebuff(iconPath)
+	for i = 1, 16 do
+		local debuff = UnitDebuff("target", i)
+		if debuff and debuff == iconPath then
+			return true
+		end
+	end
+	
+	return false
+end
+
+function LockPort:HasTongues()
+	return LockPort:HasDebuff("Interface\\Icons\\Spell_Shadow_CurseOfTounges")
+end
+function LockPort:HasShadows()
+	return LockPort:HasDebuff("Interface\\Icons\\Spell_Shadow_CurseOfAchimonde")
+end
+function LockPort:HasElements()
+	return LockPort:HasDebuff("Interface\\Icons\\Spell_Shadow_ChillTouch")
+end
+function LockPort:HasRecklessness()
+	return LockPort:HasDebuff("Interface\\Icons\\Spell_Shadow_UnholyStrength")
+end
+function LockPort:HasDoom()
+	return LockPort:HasDebuff("Interface\\Icons\\Spell_Shadow_Auraofdarkness")
+end
+
+function LockPort:WarlocksAreMoreImportant()
+	local result = true
+	local warlocks = 0
+	local mages = 0
+	
+	for i = 1, GetNumRaidMembers(), 1 do
+		local _, playerClass = UnitClass("Raid" .. i)
+		
+		if playerClass == "WARLOCK" then
+			warlocks = warlocks + 1
+		elseif playerClass == "MAGE" then
+			mages = mages + 1
+		end
+	end
+	
+	if mages > warlocks then
+		result = false -- there are more stupid mages than warlocks
+	end
+	
+	return result
+end
+
+function LockPort:GetMostImportantMissingCurse()
+	local target = UnitName("target")
+	local curse = nil
+	local priority = 0
+	
+	if LockPort:WarlocksAreMoreImportant() then
+		if not recklessnessException[target] and not LockPort:HasRecklessness() then
+			curse = BS["Curse of Recklessness"]
+			priority = cursePriority[BS["Curse of Recklessness"]]
+		end
+		if LockPort:HasRecklessness() and not LockPort:HasShadows() then
+			curse = BS["Curse of Shadow"]
+			priority = cursePriority[BS["Curse of Shadow"]]
+		end
+		if LockPort:HasRecklessness() and LockPort:HasShadows() and not LockPort:HasElements() then
+			curse = BS["Curse of the Elements"]
+			priority = cursePriority[BS["Curse of the Elements"]]
+		end
+		if LockPort:HasRecklessness() and LockPort:HasElements() and LockPort:HasShadows() and not LockPort:HasDoom() then
+			curse = BS["Curse of Doom"]
+			priority = cursePriority[BS["Curse of Doom"]]
+		end
+		if tongueTarget[target] and not LockPort:HasTongues() then
+			curse = BS["Curse of Tongues"]
+			priority = cursePriority[BS["Curse of Tongues"]]
+		end
+	else
+		if not recklessnessException[target] and not LockPort:HasRecklessness() then
+			curse = BS["Curse of Recklessness"]
+			priority = cursePriority[BS["Curse of Recklessness"]]
+		end
+		if LockPort:HasRecklessness() and not LockPort:HasElements() then
+			curse = BS["Curse of the Elements"]
+			priority = cursePriority[BS["Curse of the Elements"]]
+		end
+		if LockPort:HasRecklessness() and LockPort:HasElements() and not LockPort:HasShadows() then
+			curse = BS["Curse of Shadow"]
+			priority = cursePriority[BS["Curse of Shadow"]]
+		end
+		if LockPort:HasRecklessness() and LockPort:HasElements() and LockPort:HasShadows()  and not LockPort:HasDoom() then
+			curse = BS["Curse of Doom"]
+			priority = cursePriority[BS["Curse of Doom"]]
+		end
+		if tongueTarget[target] and not LockPort:HasTongues() then
+			curse = BS["Curse of Tongues"]
+			priority = cursePriority[BS["Curse of Tongues"]]
+		end
+	end
+	
+	return curse
+end
+
+local L = AceLibrary("AceLocale-2.2"):new("LockPort")
+local module = LockPort
+local frame = nil
+local list = {}
+local playerName = UnitName("player")
+local BS = AceLibrary("Babble-Spell-2.2")
+local BZ = AceLibrary("Babble-Zone-2.2")
+local spellStatus = AceLibrary("SpellStatus-1.0")
+
+
+-- Event module Handlers
+function module:SpellStatus_SpellCastInstant(id, name, rank, fullName, startTime, stopTime, duration, delayTotal)
+	if string.find(name, L["Curse of"]) then
+		LockPort:CastedCurse(name)
+	end
 end

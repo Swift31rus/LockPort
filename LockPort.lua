@@ -3,7 +3,8 @@ local LockPortOptions_DefaultSettings = {
 	zone = true,
 	zone = true,
 	sound = true,
-	soul = true
+	soul = true,
+	doom = false
 }
 
 local function LockPort_Initialize()
@@ -298,7 +299,7 @@ function LockPort_SlashCommand( msg )
 
 	if msg == "help" then
 		DEFAULT_CHAT_FRAME:AddMessage("|cffCB3480Lock|r|cffffffffPort|r usage:")
-		DEFAULT_CHAT_FRAME:AddMessage("/LockPort { help | show | zone | whisper | sound | curse | cursebolt }")
+		DEFAULT_CHAT_FRAME:AddMessage("/LockPort { help | show | zone | whisper | sound | curse | cursebolt | doom }")
 		DEFAULT_CHAT_FRAME:AddMessage(" - |cff9482c9help|r: prints out this help")
 		DEFAULT_CHAT_FRAME:AddMessage(" - |cff9482c9show|r: shows the current summon list")
 		DEFAULT_CHAT_FRAME:AddMessage(" - |cff9482c9zone|r: toggles zoneinfo in /ra and /w")
@@ -306,6 +307,7 @@ function LockPort_SlashCommand( msg )
 		DEFAULT_CHAT_FRAME:AddMessage(" - |cff9482c9sound|r: toggles the sound")
 		DEFAULT_CHAT_FRAME:AddMessage(" - |cff9482c9curse|r: Cast curse based on priority and if already exists. \n    Macro: |cfB34DFFf/LockPort curse|r")
 		DEFAULT_CHAT_FRAME:AddMessage(" - |cff9482c9cursebolt|r: Casts Shadow Bolt if all curses are present. \n    Macro: |cfB34DFFf/LockPort curse cursebolt|r")
+		DEFAULT_CHAT_FRAME:AddMessage(" - |cff9482c9doom|r: toggles doom on and off for curse rotations")
 		DEFAULT_CHAT_FRAME:AddMessage("To drag the frame use shift + left mouse button")
 	elseif msg == "show" then
 		for i, v in ipairs(LockPortDB) do
@@ -347,7 +349,14 @@ function LockPort_SlashCommand( msg )
 		LockPort:Curse()
 	elseif msg == "cursebolt" then
 		LockPort:CurseOrShadowbolt()
-
+	elseif msg == "doom" then
+		if LockPortOptions["doom"] == true then
+			LockPortOptions["doom"] = false
+			DEFAULT_CHAT_FRAME:AddMessage("|cffCB3480Lock|r|cffffffffPort|r - doom: |cffff0000disabled|r")
+		elseif LockPortOptions["doom"] == false then
+			LockPortOptions["doom"] = true
+			DEFAULT_CHAT_FRAME:AddMessage("|cffCB3480Lock|r|cffffffffPort|r - doom: |cff00ff00enabled|r")
+		end
 	else
 	
 		if LockPort_RequestFrame:IsVisible() then
@@ -507,6 +516,8 @@ function LockPort:CHAT_MSG_SPELL_SELF_DAMAGE(msg)
 		curseTime = nil
 		curseCasted = nil
 		self:Print(string.format(L["Your Curse of %s was |cffff0000resisted|r by %s."], userspell, target))
+		--PlaySound("igQuestFailed" ,"master")
+		PlaySoundFile("Interface\\Addons\\LockPort\\img\\toasty.mp3")
     end
 	
 	local start, ending, curse, target = string.find(msg, L["^Curse of (.+) fades from ([%w%s:]+)."])
@@ -607,9 +618,15 @@ function LockPort:GetMostImportantMissingCurse()
 			curse = BS["Curse of Shadow"]
 			priority = cursePriority[BS["Curse of Shadow"]]
 		end
-		if LockPort:HasRecklessness() and LockPort:HasElements() and LockPort:HasShadows()  and not LockPort:HasDoom() then
-			curse = BS["Curse of Doom"]
-			priority = cursePriority[BS["Curse of Doom"]]
+		if LockPortOptions.doom then
+			if LockPort:HasRecklessness() and LockPort:HasElements() and LockPort:HasShadows()  and not LockPort:HasDoom() then
+				curse = BS["Curse of Doom"]
+				priority = cursePriority[BS["Curse of Doom"]]
+			end
+		elseif not LockPortOptions.doom then
+			if LockPort:HasRecklessness() and LockPort:HasElements() and LockPort:HasShadows()  and not LockPort:HasDoom() then
+				self:Print(L["All curses are present and Doom is turned off."])
+			end
 		end
 		if tongueTarget[target] and not LockPort:HasTongues() then
 			curse = BS["Curse of Tongues"]

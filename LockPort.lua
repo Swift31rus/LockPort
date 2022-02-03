@@ -517,8 +517,6 @@ function LockPort:Curse()
 				CastSpellByName(spell)
 			else
 				self:Print(L["There are still curses missing but you already casted a more important curse"])
-				print(spell)
-				print(magelock)
 			end
 		else
 			self:Print(L["All curses are present."])
@@ -648,7 +646,6 @@ function LockPort:GetMostImportantMissingCurse()
 	if mages > warlocks then
 		magelock = false -- there are more stupid mages than warlocks
 	end
-	print(magelock)
 	if not magelock then -- more mages cast elements before shadow
 		if not recklessnessException[target] and not LockPort:HasRecklessness() then
 			curse = BS["Curse of Recklessness"]

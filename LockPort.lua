@@ -747,7 +747,6 @@ function LockPort:GetMostImportantMissingCurse()
 			end
 		elseif not LockPortOptions.doom then
 			if LockPort:HasRecklessness() and LockPort:HasElements() and LockPort:HasShadows()  and not LockPort:HasDoom() then
-				self:Print(L["All curses are present and Doom is turned off."])
 			end
 		end
 		if tongueTarget[target] and not LockPort:HasTongues() then

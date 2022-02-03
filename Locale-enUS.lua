@@ -14,6 +14,7 @@ L:RegisterTranslations("enUS",
 			["Your curse has faded."] = true,
 			["You have slain %s!"] = true,
 			["Curse of"] = true,
+			["All curses are present and Doom is turned off."] = true,
 		}
 	end
 )

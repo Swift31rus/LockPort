@@ -300,7 +300,6 @@ function LockPort_UpdateList()
 		if not LockPortDB[1] or not ( raidnum > 0 ) then
 			if LockPort_RequestFrame:IsVisible() then
 				LockPort_RequestFrame:Hide()
-				LockPort_SoulFrame:Hide()
 				table.remove(LockPortDB, 1)
 				table.remove(LockPortDB, 2)
 				table.remove(LockPortDB, 3)
@@ -314,7 +313,6 @@ function LockPort_UpdateList()
 			end
 		else
 			ShowUIPanel(LockPort_RequestFrame, 1)
-			ShowUIPanel(LockPort_SoulFrame, 1)
 		end
 	end	
 end

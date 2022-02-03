@@ -17,11 +17,22 @@ local function LockPort_Initialize()
 			LockPortOptions[i] = LockPortOptions_DefaultSettings[i];
 		end
 	end
+	LockPort_Shards()
 end
+
+local s = CreateFrame("Frame", nil, UIParent)
+s:RegisterEvent("PLAYER_LOGIN")
+s:RegisterEvent("PLAYER_ENTERING_WORLD")
+s:SetScript("OnEvent", function(self, event)
+	LockPortStoneCross:Show()
+	LockPortStoneCheck:Hide()
+
+	CreateFrame("frame"):SetScript("OnUpdate", PopUpMenu_Load)
+end)
 
 function LockPort_EventFrame_OnLoad()
 
-	DEFAULT_CHAT_FRAME:AddMessage(string.format("|cffCB3480Lock|r|cffffffffPort|r version %s by %s", GetAddOnMetadata("LockPort", "Version"), GetAddOnMetadata("LockPort", "Author")));
+	DEFAULT_CHAT_FRAME:AddMessage(string.format("|CFFB700B7L|CFFFF00FFo|CFFFF50FFc|CFFFF99FFk|CFFFFC4FFP|cffffffffort|r version %s by %s", GetAddOnMetadata("LockPort", "Version"), GetAddOnMetadata("LockPort", "Author")));
     this:RegisterEvent("VARIABLES_LOADED");
     this:RegisterEvent("CHAT_MSG_ADDON")
     this:RegisterEvent("CHAT_MSG_RAID")
@@ -36,17 +47,25 @@ function LockPort_EventFrame_OnLoad()
 	MSG_PREFIX_ADD	= "LPAdd"
 	MSG_PREFIX_REMOVE	= "LPRemove"
 	LockPortDB = {}
-	
+
 	--localization
-	LockPortLoc_Header = "|cffCB3480Lock|r|cffffffffPort|r v" .. GetAddOnMetadata("LockPort", "Version")
+	LockPortLoc_Header = "|CFFB700B7L|CFFFF00FFo|CFFFF50FFc|CFFFF99FFk|CFFFFC4FFP|cffffffffort|r"
 end
 
 function LockPort_EventFrame_OnEvent()
+
+	if (event == "PLAYER_ENTERING_WORLD") then
+		LockPort_Shards()
+	end
+	if (event == "BAG_UPDATE") then
+		LockPort_Shards()
+	end
 
 	if event == "VARIABLES_LOADED" then
 		this:UnregisterEvent("VARIABLES_LOADED")
 		LockPort_Initialize()
 		LockPort_RequestFrame_Header:SetFont("Fonts\\FRIZQT__.TTF", 10, "OUTLINE, ")
+		
 
 	elseif event == "CHAT_MSG_RAID"  or event == "CHAT_MSG_RAID_LEADER" or event == "CHAT_MSG_YELL" or event == "CHAT_MSG_WHISPER" or event == "CHAT_MSG_PARTY" then
 		
@@ -65,6 +84,10 @@ function LockPort_EventFrame_OnEvent()
 		if string.find(arg1, "^456") then
 			SendAddonMessage(MSG_PREFIX_ADD, arg2, "RAID")
 		end
+		-- if string.find(text, "^I am saving (%w+)'s soul in a soulstone.") then
+			-- LockPortStoneCheck:Show()
+			-- LockPortStoneCross:Hide()
+		-- end
 
 	elseif event == "CHAT_MSG_ADDON" then
 		if arg1 == MSG_PREFIX_ADD and LockPortOptions.sound then
@@ -123,7 +146,7 @@ function LockPort_NameListButton_OnClick(button)
 			end
 			
 		else
-			DEFAULT_CHAT_FRAME:AddMessage("|cffCB3480Lock|r|cffffffffPort|r - no Raid found")
+			DEFAULT_CHAT_FRAME:AddMessage("|CFFB700B7L|CFFFF00FFo|CFFFF50FFc|CFFFF99FFk|CFFFFC4FFP|cffffffffort|r - no Raid found")
 		end
 		
 	elseif button == "LeftButton" and not IsControlKeyDown() then
@@ -173,15 +196,15 @@ function LockPort_NameListButton_OnClick(button)
 						end
 					end
 				else
-					DEFAULT_CHAT_FRAME:AddMessage("|cffCB3480Lock|r|cffffffffPort|r - Player is in combat")
+					DEFAULT_CHAT_FRAME:AddMessage("|CFFB700B7L|CFFFF00FFo|CFFFF50FFc|CFFFF99FFk|CFFFFC4FFP|cffffffffort|r - Player is in combat")
 				end
 			else
-				DEFAULT_CHAT_FRAME:AddMessage("|cffCB3480Lock|r|cffffffffPort|r - Player " .. tostring(name) .. " not found in raid. UnitID: " .. tostring(UnitID))
+				DEFAULT_CHAT_FRAME:AddMessage("|CFFB700B7L|CFFFF00FFo|CFFFF50FFc|CFFFF99FFk|CFFFFC4FFP|cffffffffort|r - Player " .. tostring(name) .. " not found in raid. UnitID: " .. tostring(UnitID))
 				SendAddonMessage(MSG_PREFIX_REMOVE, name, "RAID")
 				LockPort_UpdateList()
 			end
 		else
-			DEFAULT_CHAT_FRAME:AddMessage("|cffCB3480Lock|r|cffffffffPort|r - no Raid found")
+			DEFAULT_CHAT_FRAME:AddMessage("|CFFB700B7L|CFFFF00FFo|CFFFF50FFc|CFFFF99FFk|CFFFFC4FFP|cffffffffort|r - no Raid found")
 		end
 	elseif button == "RightButton" then
 		for i, v in ipairs (LockPortDB) do
@@ -277,6 +300,7 @@ function LockPort_UpdateList()
 		if not LockPortDB[1] or not ( raidnum > 0 ) then
 			if LockPort_RequestFrame:IsVisible() then
 				LockPort_RequestFrame:Hide()
+				LockPort_SoulFrame:Hide()
 				table.remove(LockPortDB, 1)
 				table.remove(LockPortDB, 2)
 				table.remove(LockPortDB, 3)
@@ -290,6 +314,7 @@ function LockPort_UpdateList()
 			end
 		else
 			ShowUIPanel(LockPort_RequestFrame, 1)
+			ShowUIPanel(LockPort_SoulFrame, 1)
 		end
 	end	
 end
@@ -298,7 +323,7 @@ end
 function LockPort_SlashCommand( msg )
 
 	if msg == "help" then
-		DEFAULT_CHAT_FRAME:AddMessage("|cffCB3480Lock|r|cffffffffPort|r usage:")
+		DEFAULT_CHAT_FRAME:AddMessage("|CFFB700B7L|CFFFF00FFo|CFFFF50FFc|CFFFF99FFk|CFFFFC4FFP|cffffffffort|r usage:")
 		DEFAULT_CHAT_FRAME:AddMessage("/LockPort { help | show | zone | whisper | sound | curse | cursebolt | doom }")
 		DEFAULT_CHAT_FRAME:AddMessage(" - |cff9482c9help|r: prints out this help")
 		DEFAULT_CHAT_FRAME:AddMessage(" - |cff9482c9show|r: shows the current summon list")
@@ -316,34 +341,34 @@ function LockPort_SlashCommand( msg )
 	elseif msg == "zone" then
 		if LockPortOptions["zone"] == true then
 			LockPortOptions["zone"] = false
-			DEFAULT_CHAT_FRAME:AddMessage("|cffCB3480Lock|r|cffffffffPort|r - zoneinfo: |cffff0000disabled|r")
+			DEFAULT_CHAT_FRAME:AddMessage("|CFFB700B7L|CFFFF00FFo|CFFFF50FFc|CFFFF99FFk|CFFFFC4FFP|cffffffffort|r - zoneinfo: |cffff0000disabled|r")
 		elseif LockPortOptions["zone"] == false then
 			LockPortOptions["zone"] = true
-			DEFAULT_CHAT_FRAME:AddMessage("|cffCB3480Lock|r|cffffffffPort|r - zoneinfo: |cff00ff00enabled|r")
+			DEFAULT_CHAT_FRAME:AddMessage("|CFFB700B7L|CFFFF00FFo|CFFFF50FFc|CFFFF99FFk|CFFFFC4FFP|cffffffffort|r - zoneinfo: |cff00ff00enabled|r")
 		end
 	elseif msg == "whisper" then
 		if LockPortOptions["whisper"] == true then
 			LockPortOptions["whisper"] = false
-			DEFAULT_CHAT_FRAME:AddMessage("|cffCB3480Lock|r|cffffffffPort|r - whisper: |cffff0000disabled|r")
+			DEFAULT_CHAT_FRAME:AddMessage("|CFFB700B7L|CFFFF00FFo|CFFFF50FFc|CFFFF99FFk|CFFFFC4FFP|cffffffffort|r - whisper: |cffff0000disabled|r")
 		elseif LockPortOptions["whisper"] == false then
 			LockPortOptions["whisper"] = true
-			DEFAULT_CHAT_FRAME:AddMessage("|cffCB3480Lock|r|cffffffffPort|r - whisper: |cff00ff00enabled|r")
+			DEFAULT_CHAT_FRAME:AddMessage("|CFFB700B7L|CFFFF00FFo|CFFFF50FFc|CFFFF99FFk|CFFFFC4FFP|cffffffffort|r - whisper: |cff00ff00enabled|r")
 		end
 	elseif msg == "sound" then
 		if LockPortOptions["sound"] == true then
 			LockPortOptions["sound"] = false
-			DEFAULT_CHAT_FRAME:AddMessage("|cffCB3480Lock|r|cffffffffPort|r - sound: |cffff0000disabled|r")
+			DEFAULT_CHAT_FRAME:AddMessage("|CFFB700B7L|CFFFF00FFo|CFFFF50FFc|CFFFF99FFk|CFFFFC4FFP|cffffffffort|r - sound: |cffff0000disabled|r")
 		elseif LockPortOptions["sound"] == false then
 			LockPortOptions["sound"] = true
-			DEFAULT_CHAT_FRAME:AddMessage("|cffCB3480Lock|r|cffffffffPort|r - sound: |cff00ff00enabled|r")
+			DEFAULT_CHAT_FRAME:AddMessage("|CFFB700B7L|CFFFF00FFo|CFFFF50FFc|CFFFF99FFk|CFFFFC4FFP|cffffffffort|r - sound: |cff00ff00enabled|r")
 		end
 	elseif msg == "soul" then
 		if LockPortOptions["soul"] == true then
 			LockPortOptions["soul"] = false
-			DEFAULT_CHAT_FRAME:AddMessage("|cffCB3480Lock|r|cffffffffPort|r - soul: |cffff0000disabled|r")
+			DEFAULT_CHAT_FRAME:AddMessage("|CFFB700B7L|CFFFF00FFo|CFFFF50FFc|CFFFF99FFk|CFFFFC4FFP|cffffffffort|r - soul: |cffff0000disabled|r")
 		elseif LockPortOptions["soul"] == false then
 			LockPortOptions["soul"] = true
-			DEFAULT_CHAT_FRAME:AddMessage("|cffCB3480Lock|r|cffffffffPort|r - soul: |cff00ff00enabled|r")
+			DEFAULT_CHAT_FRAME:AddMessage("|CFFB700B7L|CFFFF00FFo|CFFFF50FFc|CFFFF99FFk|CFFFFC4FFP|cffffffffort|r - soul: |cff00ff00enabled|r")
 		end
 	elseif msg == "curse" then
 		LockPort:Curse()
@@ -352,10 +377,16 @@ function LockPort_SlashCommand( msg )
 	elseif msg == "doom" then
 		if LockPortOptions["doom"] == true then
 			LockPortOptions["doom"] = false
-			DEFAULT_CHAT_FRAME:AddMessage("|cffCB3480Lock|r|cffffffffPort|r - doom: |cffff0000disabled|r")
+			DEFAULT_CHAT_FRAME:AddMessage("|CFFB700B7L|CFFFF00FFo|CFFFF50FFc|CFFFF99FFk|CFFFFC4FFP|cffffffffort|r - doom: |cffff0000disabled|r")
 		elseif LockPortOptions["doom"] == false then
 			LockPortOptions["doom"] = true
-			DEFAULT_CHAT_FRAME:AddMessage("|cffCB3480Lock|r|cffffffffPort|r - doom: |cff00ff00enabled|r")
+			DEFAULT_CHAT_FRAME:AddMessage("|CFFB700B7L|CFFFF00FFo|CFFFF50FFc|CFFFF99FFk|CFFFFC4FFP|cffffffffort|r - doom: |cff00ff00enabled|r")
+		end
+	elseif msg == "stone" then
+		if LockPort_SoulFrame:IsVisible() then
+			LockPort_SoulFrame:Hide()
+		else
+			ShowUIPanel(LockPort_SoulFrame, 1)
 		end
 	else
 	
@@ -487,6 +518,7 @@ function LockPort:Curse()
 			else
 				self:Print(L["There are still curses missing but you already casted a more important curse"])
 				print(spell)
+				print(magelock)
 			end
 		else
 			self:Print(L["All curses are present."])
@@ -592,12 +624,6 @@ function LockPort:WarlocksAreMoreImportant()
 	if mages > warlocks then
 		result = false -- there are more stupid mages than warlocks
 	end
-	if mages == warlocks then
-		result = true -- there are more stupid mages than warlocks
-	end
-	if warlocks > mages then
-		result = true -- there are more stupid mages than warlocks
-	end	
 	return result
 end
 
@@ -605,7 +631,25 @@ function LockPort:GetMostImportantMissingCurse()
 	local target = UnitName("target")
 	local curse = nil
 	local priority = 0
+	local magelock = true
+	local warlocks = 0
+	local mages = 0
 	
+	for i = 1, GetNumRaidMembers(), 1 do
+		local _, playerClass = UnitClass("Raid" .. i)
+		
+		if playerClass == "WARLOCK" then
+			warlocks = warlocks + 1
+		elseif playerClass == "MAGE" then
+			mages = mages + 1
+		end
+	end
+	
+	if mages > warlocks then
+		magelock = false -- there are more stupid mages than warlocks
+	end
+	print(magelock)
+	if not magelock then -- more mages cast elements before shadow
 		if not recklessnessException[target] and not LockPort:HasRecklessness() then
 			curse = BS["Curse of Recklessness"]
 			priority = cursePriority[BS["Curse of Recklessness"]]
@@ -632,7 +676,88 @@ function LockPort:GetMostImportantMissingCurse()
 			curse = BS["Curse of Tongues"]
 			priority = cursePriority[BS["Curse of Tongues"]]
 		end
-	
+	elseif magelock then -- more locks cast shadow before elements
+		if not recklessnessException[target] and not LockPort:HasRecklessness() then
+			curse = BS["Curse of Recklessness"]
+			priority = cursePriority[BS["Curse of Recklessness"]]
+		end
+		if LockPort:HasRecklessness() and not LockPort:HasShadows() then
+			curse = BS["Curse of Shadow"]
+			priority = cursePriority[BS["Curse of Shadow"]]
+		end
+		if LockPort:HasRecklessness() and LockPort:HasShadows() and not LockPort:HasElements() then
+			curse = BS["Curse of the Elements"]
+			priority = cursePriority[BS["Curse of the Elements"]]
+		end
+		if LockPortOptions.doom then
+			if LockPort:HasRecklessness() and LockPort:HasElements() and LockPort:HasShadows()  and not LockPort:HasDoom() then
+				curse = BS["Curse of Doom"]
+				priority = cursePriority[BS["Curse of Doom"]]
+			end
+		elseif not LockPortOptions.doom then
+			if LockPort:HasRecklessness() and LockPort:HasElements() and LockPort:HasShadows()  and not LockPort:HasDoom() then
+				self:Print(L["All curses are present and Doom is turned off."])
+			end
+		end
+		if tongueTarget[target] and not LockPort:HasTongues() then
+			curse = BS["Curse of Tongues"]
+			priority = cursePriority[BS["Curse of Tongues"]]
+		end
+	elseif recklessnessException[target] and magelock then -- if target doesnt get curse of recklessness and more locks than mages
+		if not recklessnessException[target] and not LockPort:HasRecklessness() then
+			curse = BS["Curse of Recklessness"]
+			priority = cursePriority[BS["Curse of Recklessness"]]
+		end
+		if not LockPort:HasShadows() then
+			curse = BS["Curse of Shadow"]
+			priority = cursePriority[BS["Curse of Shadow"]]
+		end
+		if LockPort:HasShadows() and not LockPort:HasElements() then
+			curse = BS["Curse of the Elements"]
+			priority = cursePriority[BS["Curse of the Elements"]]
+		end
+		if LockPortOptions.doom then
+			if LockPort:HasRecklessness() and LockPort:HasElements() and LockPort:HasShadows()  and not LockPort:HasDoom() then
+				curse = BS["Curse of Doom"]
+				priority = cursePriority[BS["Curse of Doom"]]
+			end
+		elseif not LockPortOptions.doom then
+			if LockPort:HasRecklessness() and LockPort:HasElements() and LockPort:HasShadows()  and not LockPort:HasDoom() then
+				self:Print(L["All curses are present and Doom is turned off."])
+			end
+		end
+		if tongueTarget[target] and not LockPort:HasTongues() then
+			curse = BS["Curse of Tongues"]
+			priority = cursePriority[BS["Curse of Tongues"]]
+		end
+	elseif recklessnessException[target] and not magelock then -- if target doesnt get curse of recklessness and more mages than locks
+		if not recklessnessException[target] and not LockPort:HasRecklessness() then
+			curse = BS["Curse of Recklessness"]
+			priority = cursePriority[BS["Curse of Recklessness"]]
+		end
+		if not LockPort:HasElements() then
+			curse = BS["Curse of the Elements"]
+			priority = cursePriority[BS["Curse of the Elements"]]
+		end
+		if LockPort:HasElements() and not LockPort:HasShadows() then
+			curse = BS["Curse of Shadow"]
+			priority = cursePriority[BS["Curse of Shadow"]]
+		end
+		if LockPortOptions.doom then
+			if LockPort:HasRecklessness() and LockPort:HasElements() and LockPort:HasShadows()  and not LockPort:HasDoom() then
+				curse = BS["Curse of Doom"]
+				priority = cursePriority[BS["Curse of Doom"]]
+			end
+		elseif not LockPortOptions.doom then
+			if LockPort:HasRecklessness() and LockPort:HasElements() and LockPort:HasShadows()  and not LockPort:HasDoom() then
+				self:Print(L["All curses are present and Doom is turned off."])
+			end
+		end
+		if tongueTarget[target] and not LockPort:HasTongues() then
+			curse = BS["Curse of Tongues"]
+			priority = cursePriority[BS["Curse of Tongues"]]
+		end
+	end
 	return curse
 end
 
@@ -652,3 +777,42 @@ function module:SpellStatus_SpellCastInstant(id, name, rank, fullName, startTime
 		LockPort:CastedCurse(name)
 	end
 end
+
+-- shards
+function LockPort_Shards() -- Debugging
+	icon = "Interface\\AddOns\\TitanCheckStone\\soulstone"
+	i=1; 
+	for bag = 0,4,1 do 
+		for slot = 1, GetContainerNumSlots(bag), 1 do 
+			local name = GetContainerItemLink(bag,slot); 
+			if name and string.find(name,"Soul Shard") then 
+				LockPortShardCount:SetText(i);
+				LockPortShardCount:SetTextColor(1.0, 0.55, 0.0);
+				LockPortShardCount:SetFont("Fonts\\FRIZQT__.TTF", 18, "OUTLINE, ")
+				i=i+1; 
+			end
+		end
+	end
+end
+
+-- Events to listen for:
+local f = CreateFrame'Frame'
+f:RegisterEvent'BAG_UPDATE'
+f:RegisterEvent'PLAYER_REGEN_ENABLED'
+f:RegisterEvent("PLAYER_LOGIN")
+
+-- Check if something is in the bags and check if player exited combat.
+local combat, bag = nil, nil
+f:SetScript('OnEvent', function()
+	-- DEFAULT_CHAT_FRAME:AddMessage("registered")
+	if event == "BAG_UPDATE" then
+		bag = true
+	elseif event == "PLAYER_REGEN_ENABLED" then
+		combat = true
+	end
+
+	if bag and combat then
+		bag, combat = nil, nil
+		LockPort_Shards();
+	end
+end)

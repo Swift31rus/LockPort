@@ -355,6 +355,15 @@
 						</Anchor>
 					</Anchors>
 				</FontString>
+				<FontString name="LockPortStonefadedNAME" inherits="LockPort_GameFontHeader"  hidden="true" text="">
+					<Anchors>
+						<Anchor point="CENTER" relativeTo="Stone">
+							<Offset>
+								<AbsDimension x="-50" y="1"/>
+							</Offset>
+						</Anchor>
+					</Anchors>
+				</FontString>
 				<Texture name="LockPortStoneCross" frameStrata="MEDIUM" file="Interface\Addons\LockPort\img\notstoned">
 				  <Size>
 					<AbsDimension x="40" y="40"/>

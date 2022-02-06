@@ -43,6 +43,8 @@ function LockPort_EventFrame_OnLoad()
     this:RegisterEvent("CHAT_MSG_SAY")
     this:RegisterEvent("CHAT_MSG_SPELL_AURA_GONE_OTHER")
     this:RegisterEvent("CHAT_MSG_SPELL_AURA_GONE_SELF")
+    this:RegisterEvent("UNITDIESOTHER")
+    this:RegisterEvent("UNITDIESSELF")
     
 	SlashCmdList["LockPort"] = LockPort_SlashCommand
 	SLASH_LockPort1 = "/LockPort"
@@ -82,19 +84,13 @@ function LockPort_EventFrame_OnEvent()
 
 	elseif event == "CHAT_MSG_RAID" or event == "CHAT_MSG_RAID_LEADER" or event == "CHAT_MSG_YELL" or event == "CHAT_MSG_WHISPER" or event == "CHAT_MSG_PARTY" then
 		
-		if string.find(arg1, "^123") then
+		if string.find(arg1, "123") then
 			SendAddonMessage(MSG_PREFIX_ADD, arg2, "RAID")
 		end
-		if string.find(arg1, "^summon pls") then
+		if string.find(arg1, "summon") then
 			SendAddonMessage(MSG_PREFIX_ADD, arg2, "RAID")
 		end
-		if string.find(arg1, "^summon me") then
-			SendAddonMessage(MSG_PREFIX_ADD, arg2, "RAID")
-		end
-		if string.find(arg1, "^summon") then
-			SendAddonMessage(MSG_PREFIX_ADD, arg2, "RAID")
-		end
-		if string.find(arg1, "^456") then
+		if string.find(arg1, "456") then
 			SendAddonMessage(MSG_PREFIX_ADD, arg2, "RAID")
 		end
 	elseif event == "CHAT_MSG_ADDON" then
@@ -118,23 +114,33 @@ function LockPort_EventFrame_OnEvent()
 					end
 				end
 			end
-		elseif event == "CHAT_MSG_ADDON" and arg1 == MSG_PREFIX_STONE_ADD then -- Stone Add
+		elseif arg1 == MSG_PREFIX_STONE_ADD then -- Stone Add
 			if strfind(arg2,"LP Character %a+ Soulstoned") then
 				local _,_,soulName =  strfind(arg2,"LP Character (%a+) Soulstoned")
 				LockPort_Stoned()
 				LockPortStoneNAME:SetText(soulName)
 				LPPrint(""..LockPortStoneNAME:GetText().." has been Soulstoned")
 			end
-		elseif event == "CHAT_MSG_SPELL_AURA_GONE_OTHER" or event == "CHAT_MSG_SPELL_AURA_GONE_SELF" then -- Stone Fade
-			if string.find(arg1, "Demon Armor fades from") then
-				LPPrint("Success found combatlog") --debug for issue
-			end
 		elseif arg1 == MSG_PREFIX_STONE_REMOVE then -- Stone Remove
-						LockPort_NotStoned()
-						LPPrint("Soulstone Resurrection fades from "..LockPortStoneNAME:GetText()..".")
-						LockPortStoneNAME:SetText("")
+			if strfind(arg2,"LP Character %a+ Soulstone faded") then
+				local _,_,soulfadedName =  strfind(arg2,"LP Character (%a+) Soulstone faded")
+				LockPort_NotStoned()
+				LockPortStonefadedNAME:SetText(soulfadedName)
+				LockPortStoneNAME:SetText("")
+				LPPrint(""..LockPortStonefadedNAME:GetText().." no longer has a Soulstone.")
+			end
+		end
+		elseif event == "CHAT_MSG_SPELL_AURA_GONE_OTHER" or event == "CHAT_MSG_SPELL_AURA_GONE_SELF" then -- Stone Fade
+			if string.find(arg1, "Soulstone Resurrection fades from "..LockPortStoneNAME:GetText()..".") then
+				--LPPrint("LockPortStoneNAME:GetText()") --debug
+				SendAddonMessage(MSG_PREFIX_STONE_REMOVE, "LP Character "..LockPortStoneNAME:GetText().." Soulstone faded", "RAID")
+			end
+		--elseif event == "UNITDIESOTHER" or event == "UNITDIESSELF" then -- Stone Fades Player Died
+			--if string.find(arg1, ""..LockPortStoneNAME:GetText().." dies.") then
+				--LPPrint(LockPortStoneNAME:GetText()) --debug
+				--SendAddonMessage(MSG_PREFIX_STONE_REMOVE, "LP Character "..LockPortStoneNAME:GetText().." Soulstone faded", "RAID")
+			--end
 	end
-end
 end
 
 function LockPort_hasValue (tab, val)

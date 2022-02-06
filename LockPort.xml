@@ -275,7 +275,7 @@
 			</OnDragStop>
 		</Scripts>
 	</Frame>
-	<Frame name="LockPort_SoulFrame" frameStrata="LOW" toplevel="true" parent="UIParent" movable="true" enableMouse="true" hidden="true" clampedToScreen="true">
+	<Frame name="LockPort_SoulFrame" frameStrata="LOW" toplevel="true" parent="UIParent" movable="true" enableMouse="true" hidden="false" clampedToScreen="true">
 		<Size>
 			<AbsDimension x="130" y="50"/>
 		</Size>
@@ -311,8 +311,21 @@
 					  </Offset>
 					</Anchor>
 				  </Anchors>
+					<Scripts>
+						<OnLoad>
+							this:RegisterForClicks("LeftButtonUp", "RightButtonUp");
+							this:SetBackdropColor(0.8, 0.8, 0.8, 0.0);
+						</OnLoad>
+						<OnClick>
+							LockPort_NameListButton_OnClick(arg1);
+						</OnClick>
+						<OnEnter>
+						</OnEnter>
+						<OnLeave>
+						</OnLeave>
+					</Scripts>
 				</Texture>
-				<Texture name="Stone2" frameStrata="LOW" file="Interface\Icons\inv_misc_orb_04">
+				<Texture name="Health" frameStrata="LOW" file="Interface\Icons\inv_stone_04">
 				  <Size>
 					<AbsDimension x="40" y="40"/>
 				  </Size>
@@ -333,7 +346,16 @@
 						</Anchor>
 					</Anchors>
 				</FontString>
-				<Texture name="LockPortStoneCross" frameStrata="MEDIUM" file="Interface\Addons\LockPort\img\readycheck-notready">
+				<FontString name="LockPortStoneNAME" inherits="LockPort_GameFontHeader"  hidden="true" text="">
+					<Anchors>
+						<Anchor point="CENTER" relativeTo="Stone">
+							<Offset>
+								<AbsDimension x="-50" y="1"/>
+							</Offset>
+						</Anchor>
+					</Anchors>
+				</FontString>
+				<Texture name="LockPortStoneCross" frameStrata="MEDIUM" file="Interface\Addons\LockPort\img\notstoned">
 				  <Size>
 					<AbsDimension x="40" y="40"/>
 				  </Size>
@@ -345,7 +367,7 @@
 					</Anchor>
 				  </Anchors>
 				</Texture>
-				<Texture name="LockPortStoneCheck" frameStrata="MEDIUM" file="Interface\Addons\LockPort\img\readycheck-ready">
+				<Texture name="LockPortStoneCheck" frameStrata="MEDIUM" file="Interface\Addons\LockPort\img\stoned">
 				  <Size>
 					<AbsDimension x="40" y="40"/>
 				  </Size>

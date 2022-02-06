@@ -16,16 +16,14 @@ local function LockPort_Initialize()
 			LockPortOptions[i] = LockPortOptions_DefaultSettings[i];
 		end
 	end
-	LockPort_Shards()
-	LockPort_NotStoned()
-	soulName = nil
 end
 
 local s = CreateFrame("Frame", nil, UIParent)
 s:RegisterEvent("PLAYER_LOGIN")
-s:RegisterEvent("PLAYER_ENTERING_WORLD")
 s:SetScript("OnEvent", function(self, event)
-
+		LockPort_Shards()
+		LockPort_NotStoned()
+		LockPortStoneNAME:SetText("")
 
 	CreateFrame("frame"):SetScript("OnUpdate", PopUpMenu_Load)
 end)
@@ -43,8 +41,7 @@ function LockPort_EventFrame_OnLoad()
     this:RegisterEvent("CHAT_MSG_SAY")
     this:RegisterEvent("CHAT_MSG_SPELL_AURA_GONE_OTHER")
     this:RegisterEvent("CHAT_MSG_SPELL_AURA_GONE_SELF")
-    this:RegisterEvent("UNITDIESOTHER")
-    this:RegisterEvent("UNITDIESSELF")
+    this:RegisterEvent("CHAT_MSG_COMBAT_FRIENDLY_DEATH")
     
 	SlashCmdList["LockPort"] = LockPort_SlashCommand
 	SLASH_LockPort1 = "/LockPort"
@@ -63,14 +60,10 @@ end
 function LockPort_EventFrame_OnEvent()
 
 	if (event == "PLAYER_LOGIN") then
-		LockPort_Shards()
-		LockPort_NotStoned()
-		LockPortStoneNAME:SetText("")
+
 	end
 	if (event == "PLAYER_ENTERING_WORLD") then
-		LockPort_Shards()
-		LockPort_NotStoned()
-		LockPortStoneNAME:SetText("")
+
 	end
 	if (event == "BAG_UPDATE") then
 		LockPort_Shards()
@@ -135,11 +128,11 @@ function LockPort_EventFrame_OnEvent()
 				--LPPrint("LockPortStoneNAME:GetText()") --debug
 				SendAddonMessage(MSG_PREFIX_STONE_REMOVE, "LP Character "..LockPortStoneNAME:GetText().." Soulstone faded", "RAID")
 			end
-		--elseif event == "UNITDIESOTHER" or event == "UNITDIESSELF" then -- Stone Fades Player Died
-			--if string.find(arg1, ""..LockPortStoneNAME:GetText().." dies.") then
-				--LPPrint(LockPortStoneNAME:GetText()) --debug
-				--SendAddonMessage(MSG_PREFIX_STONE_REMOVE, "LP Character "..LockPortStoneNAME:GetText().." Soulstone faded", "RAID")
-			--end
+		elseif event == "CHAT_MSG_COMBAT_FRIENDLY_DEATH" then -- Stone Fades Player Died
+			if string.find(arg1, ""..LockPortStoneNAME:GetText().." dies.") then
+				LPPrint(LockPortStoneNAME:GetText()) --debug
+				SendAddonMessage(MSG_PREFIX_STONE_REMOVE, "LP Character "..LockPortStoneNAME:GetText().." Soulstone faded", "RAID")
+			end
 	end
 end
 
@@ -412,7 +405,7 @@ function LockPort_SlashCommand( msg ) --Slash Handler
 		if LockPort_SoulFrame:IsVisible() then
 			LockPort_SoulFrame:Hide()
 		else
-			ShowUIPanel(LockPort_SoulFrame, 1)
+			LockPort_SoulFrame:Show()
 		end
 	else
 		if LockPort_RequestFrame:IsVisible() then -- LockPort Frame Toggle (/lockport)

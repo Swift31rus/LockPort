@@ -317,7 +317,6 @@
 							this:SetBackdropColor(0.8, 0.8, 0.8, 0.0);
 						</OnLoad>
 						<OnClick>
-							LockPort_NameListButton_OnClick(arg1);
 						</OnClick>
 						<OnEnter>
 						</OnEnter>
@@ -346,7 +345,7 @@
 						</Anchor>
 					</Anchors>
 				</FontString>
-				<FontString name="LockPortStoneNAME" inherits="LockPort_GameFontHeader"  hidden="true" text="">
+				<FontString name="LockPortStoneNAME" inherits="LockPort_GameFontHeader"  hidden="true" text="-">
 					<Anchors>
 						<Anchor point="CENTER" relativeTo="Stone">
 							<Offset>
@@ -355,7 +354,7 @@
 						</Anchor>
 					</Anchors>
 				</FontString>
-				<FontString name="LockPortStonefadedNAME" inherits="LockPort_GameFontHeader"  hidden="true" text="">
+				<FontString name="LockPortStonefadedNAME" inherits="LockPort_GameFontHeader"  hidden="true" text="-">
 					<Anchors>
 						<Anchor point="CENTER" relativeTo="Stone">
 							<Offset>

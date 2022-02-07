@@ -23,7 +23,7 @@ s:RegisterEvent("PLAYER_LOGIN")
 s:SetScript("OnEvent", function(self, event)
 		LockPort_Shards()
 		LockPort_NotStoned()
-		LockPortStoneNAME:SetText("")
+		LockPortStoneNAME:SetText("NONE")
 
 	CreateFrame("frame"):SetScript("OnUpdate", PopUpMenu_Load)
 end)
@@ -58,12 +58,11 @@ function LockPort_EventFrame_OnLoad()
 end
 
 function LockPort_EventFrame_OnEvent()
-
 	if (event == "PLAYER_LOGIN") then
-
+	LockPortStoneNAME:SetText("NONE")
 	end
 	if (event == "PLAYER_ENTERING_WORLD") then
-
+	
 	end
 	if (event == "BAG_UPDATE") then
 		LockPort_Shards()
@@ -125,7 +124,6 @@ function LockPort_EventFrame_OnEvent()
 		end
 		elseif event == "CHAT_MSG_SPELL_AURA_GONE_OTHER" or event == "CHAT_MSG_SPELL_AURA_GONE_SELF" then -- Stone Fade
 			if string.find(arg1, "Soulstone Resurrection fades from "..LockPortStoneNAME:GetText()..".") then
-				--LPPrint("LockPortStoneNAME:GetText()") --debug
 				SendAddonMessage(MSG_PREFIX_STONE_REMOVE, "LP Character "..LockPortStoneNAME:GetText().." Soulstone faded", "RAID")
 			end
 		elseif event == "CHAT_MSG_COMBAT_FRIENDLY_DEATH" then -- Stone Fades Player Died

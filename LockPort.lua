@@ -118,7 +118,7 @@ function LockPort_EventFrame_OnEvent()
 				local _,_,soulfadedName =  strfind(arg2,"LP Character (%a+) Soulstone faded")
 				LockPort_NotStoned()
 				LockPortStonefadedNAME:SetText(soulfadedName)
-				LockPortStoneNAME:SetText("")
+				LockPortStoneNAME:SetText("NONE")
 				LPPrint(""..LockPortStonefadedNAME:GetText().." no longer has a Soulstone.")
 			end
 		end

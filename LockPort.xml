@@ -4,11 +4,9 @@
 		<Scripts>
 			<OnLoad>
 				LockPort_EventFrame_OnLoad();
-				this:RegisterEvent("SPELLCAST_START");
 			</OnLoad>
 			<OnEvent>
 				LockPort_EventFrame_OnEvent();
-				SoulMonitor_OnEvent(event, arg1, arg2);
 			</OnEvent>
 		</Scripts>
 	</Frame>
@@ -74,14 +72,27 @@
 		</Layers>
 	</Button>
 
-	<Font name="LockPort_GameFontHeader" font="Fonts\FRIZQT__.TTF" inherits="GameFontHighlight" virtual="true">
+	<Button name="LockPort_TitleButton_Template" virtual="true">
+		<Size>
+			<AbsDimension x="12" y="12"/>
+		</Size>
+		<Anchors>
+			<Anchor point="RIGHT">
+				<Offset>
+					<AbsDimension x="-5" y="0"/>
+				</Offset>
+			</Anchor>
+		</Anchors>
+	</Button>
+
+	<Font name="LockPort_GameFontHeader" font="Interface\AddOns\LockPort\fonts\Expressway.ttf" virtual="true">
 		<FontHeight>
-			<AbsValue val="8"/>
+			<AbsValue val="12"/>
 		</FontHeight>
 		<Color r="1" g="1" b="1"/>
 	</Font>
 	
-	<Frame name="LockPort_RequestFrame" frameStrata="LOW" toplevel="true" parent="UIParent" movable="true" enableMouse="true" hidden="true" clampedToScreen="true">
+	<Frame name="LockPort_RequestFrame" frameStrata="DIALOG" toplevel="true" parent="UIParent" movable="true" enableMouse="true" hidden="true" clampedToScreen="true">
 		<Size>
 			<AbsDimension x="130" y="180"/>
 		</Size>
@@ -92,34 +103,79 @@
 				</Offset>
 			</Anchor>
 		</Anchors>
-		<Layers>
-			<Layer level="OVERLAY">
-				<FontString name="LockPort_RequestFrame_Header" inherits="LockPort_GameFontHeader" text="LockPortLoc_Header">
-					<Anchors>
-						<Anchor point="CENTER" relativeTo="$parent" relativePoint="TOP">
-							<Offset>
-								<AbsDimension x="0" y="-10"/>
-							</Offset>
-						</Anchor>
-					</Anchors>
-				</FontString>
-			</Layer>
-		</Layers>
-		<Backdrop bgFile="Interface\DialogFrame\UI-DialogBox-Background" edgeFile="Interface\AddOns\LockPort\img\border" tile="true">			
-			<BackgroundInsets>
-				<AbsInset bottom="2" left="2" right="2" top="2"></AbsInset>
-			</BackgroundInsets>
-			<TileSize>
-				<AbsValue val="32"></AbsValue>
-			</TileSize>
-			<EdgeSize>
-				<AbsValue val="16"></AbsValue>
-			</EdgeSize>
-			<BorderColor>
-			<Color a="0" r="1" g="1" b="1" />
-			</BorderColor>
-		</Backdrop>
+		<Backdrop bgFile="Interface\DialogFrame\UI-DialogBox-Background" tile="true"></Backdrop>
 		<Frames>
+			<Frame name="LockPort_TitleFrame" hidden="false">
+				<Size>
+					<AbsDimension x="130" y="18"/>
+				</Size>
+				<Layers>
+					<Layer level="OVERLAY">
+						<FontString name="LockPort_RequestFrame_Header" inherits="LockPort_GameFontHeader" text="LockPortLoc_Header">
+							<Anchors>
+								<Anchor point="CENTER" relativeTo="$parent" relativePoint="TOP">
+									<Offset>
+										<AbsDimension x="0" y="-8"/>
+									</Offset>
+								</Anchor>
+							</Anchors>
+						</FontString>
+					</Layer>
+				</Layers>
+					<Backdrop bgFile="Interface\DialogFrame\UI-DialogBox-Background" edgeFile="Interface\AddOns\LockPort\img\border" tile="true">			
+						<BackgroundInsets>
+							<AbsInset bottom="2" left="2" right="2" top="2"></AbsInset>
+						</BackgroundInsets>
+						<TileSize>
+							<AbsValue val="32"></AbsValue>
+						</TileSize>
+						<EdgeSize>
+							<AbsValue val="16"></AbsValue>
+						</EdgeSize>
+						<BorderColor>
+						<Color a="0" r="1" g="1" b="1" />
+						</BorderColor>
+					</Backdrop>
+				<Anchors>
+					<Anchor point="TOPLEFT">
+						<Offset>
+							<AbsDimension x="0" y="0"/>
+						</Offset>
+					</Anchor>
+				</Anchors>
+
+				<Frames>
+					<Button name="LockPort_CloseButton" inherits="LockPort_TitleButton_Template">
+						<Scripts>
+							<OnClick>
+								LockPort_RequestFrame:Hide()
+							</OnClick>
+							<OnLeave>
+							</OnLeave>
+						</Scripts>
+						<NormalTexture file="Interface\AddOns\LockPort\img\close"/>
+						<HighlightTexture file="Interface\AddOns\LockPort\img\close" alphaMode="ADD"/>
+					</Button>
+
+					<Button name="LockPort_SettingsButton" inherits="LockPort_TitleButton_Template" hidden="true">
+						<Scripts>
+							<OnClick>
+								<!-- LockPort_RequestFrame:Show() -->
+							</OnClick>
+						</Scripts>
+						<NormalTexture file="Interface\AddOns\LockPort\img\settings"/>
+						<HighlightTexture file="Interface\AddOns\LockPort\img\settings" alphaMode="ADD"/>
+						<Anchors>
+							<Anchor point="RIGHT" relativeTo="LockPort_CloseButton" relativePoint="LEFT">
+								<Offset>
+									<AbsDimension x="-2"/>
+								</Offset>
+							</Anchor>
+						</Anchors>
+					</Button>
+				</Frames>
+			</Frame>
+
 			<Button name="LockPort_NameList1" inherits="LockPort_NameListButton" id="1" hidden="true">
 				<Backdrop bgFile="Interface\Tooltips\UI-Tooltip-Background" tile="true">
 					<TileSize>
@@ -266,171 +322,12 @@
 				this:RegisterForDrag("LeftButton")
 			</OnLoad>
 			<OnDragStart>
-					if IsShiftKeyDown() then
-						this:StartMoving();
-					end
+				this:StartMoving();
 			</OnDragStart>
 			<OnDragStop>
-					this:StopMovingOrSizing();
+				this:StopMovingOrSizing();
 			</OnDragStop>
 		</Scripts>
 	</Frame>
-	<Frame name="LockPort_SoulFrame" frameStrata="LOW" toplevel="true" parent="UIParent" movable="true" enableMouse="true" hidden="false" clampedToScreen="true">
-		<Size>
-			<AbsDimension x="130" y="50"/>
-		</Size>
-		<Anchors>
-			<Anchor point="CENTER" relativeTo="LockPort_RequestFrame" relativePoint="TOP">
-				<Offset>
-					<AbsDimension x="0" y="15"/>
-				</Offset>
-			</Anchor>
-		</Anchors>
-		<Layers>
-			<Layer level="OVERLAY">
-				<Texture name="Shard" frameStrata="LOW" file="Interface\Icons\inv_misc_gem_amethyst_02">
-				  <Size>
-					<AbsDimension x="40" y="40"/>
-				  </Size>
-				  <Anchors>
-					<Anchor point="RIGHT">
-					  <Offset>
-						<AbsDimension x="-3" y="0"/>
-					  </Offset>
-					</Anchor>
-				  </Anchors>
-				</Texture>
-				<Texture name="Stone" frameStrata="LOW" file="Interface\Icons\inv_misc_orb_04">
-				  <Size>
-					<AbsDimension x="40" y="40"/>
-				  </Size>
-				  <Anchors>
-					<Anchor point="LEFT">
-					  <Offset>
-						<AbsDimension x="3" y="0"/>
-					  </Offset>
-					</Anchor>
-				  </Anchors>
-					<Scripts>
-						<OnLoad>
-							this:RegisterForClicks("LeftButtonUp", "RightButtonUp");
-							this:SetBackdropColor(0.8, 0.8, 0.8, 0.0);
-						</OnLoad>
-						<OnClick>
-						</OnClick>
-						<OnEnter>
-						</OnEnter>
-						<OnLeave>
-						</OnLeave>
-					</Scripts>
-				</Texture>
-				<Texture name="Health" frameStrata="LOW" file="Interface\Icons\inv_stone_04">
-				  <Size>
-					<AbsDimension x="40" y="40"/>
-				  </Size>
-				  <Anchors>
-					<Anchor point="CENTER">
-					  <Offset>
-						<AbsDimension x="0" y="0"/>
-					  </Offset>
-					</Anchor>
-				  </Anchors>
-				</Texture>
-				<FontString name="LockPortShardCount" inherits="LockPort_GameFontHeader" text="">
-					<Anchors>
-						<Anchor point="CENTER" relativeTo="Shard">
-							<Offset>
-								<AbsDimension x="1" y="1"/>
-							</Offset>
-						</Anchor>
-					</Anchors>
-				</FontString>
-				<FontString name="LockPortStoneNAME" inherits="LockPort_GameFontHeader"  hidden="true" text="-">
-					<Anchors>
-						<Anchor point="CENTER" relativeTo="Stone">
-							<Offset>
-								<AbsDimension x="-50" y="1"/>
-							</Offset>
-						</Anchor>
-					</Anchors>
-				</FontString>
-				<FontString name="LockPortStonefadedNAME" inherits="LockPort_GameFontHeader"  hidden="true" text="-">
-					<Anchors>
-						<Anchor point="CENTER" relativeTo="Stone">
-							<Offset>
-								<AbsDimension x="-50" y="1"/>
-							</Offset>
-						</Anchor>
-					</Anchors>
-				</FontString>
-				<Texture name="LockPortStoneCross" frameStrata="MEDIUM" file="Interface\Addons\LockPort\img\notstoned">
-				  <Size>
-					<AbsDimension x="40" y="40"/>
-				  </Size>
-				  <Anchors>
-					<Anchor point="CENTER" relativeTo="Stone">
-					  <Offset>
-						<AbsDimension x="-1" y="1"/>
-					  </Offset>
-					</Anchor>
-				  </Anchors>
-				</Texture>
-				<Texture name="LockPortStoneCheck" frameStrata="MEDIUM" file="Interface\Addons\LockPort\img\stoned">
-				  <Size>
-					<AbsDimension x="40" y="40"/>
-				  </Size>
-				  <Anchors>
-					<Anchor point="CENTER" relativeTo="Stone">
-					  <Offset>
-						<AbsDimension x="-1" y="1"/>
-					  </Offset>
-					</Anchor>
-				  </Anchors>
-				</Texture>
-			</Layer>
-		</Layers>
-		<Backdrop bgFile="Interface\DialogFrame\UI-DialogBox-Background" edgeFile="Interface\AddOns\LockPort\img\border" tile="true">			
-			<BackgroundInsets>
-				<AbsInset bottom="2" left="2" right="2" top="2"></AbsInset>
-			</BackgroundInsets>
-			<TileSize>
-				<AbsValue val="32"></AbsValue>
-			</TileSize>
-			<EdgeSize>
-				<AbsValue val="16"></AbsValue>
-			</EdgeSize>
-			<BorderColor>
-			<Color a="0" r="1" g="1" b="1" />
-			</BorderColor>
-		</Backdrop>
-		<Frames>
-			<Button name="LockPort_NameList1" inherits="LockPort_NameListButton" id="1" hidden="true">
-				<Backdrop bgFile="Interface\Tooltips\UI-Tooltip-Background" tile="true">
-					<TileSize>
-						<AbsValue val="16"/>
-					</TileSize>
-				</Backdrop>
-				<Anchors>
-					<Anchor point="TOP">
-						<Offset>
-							<AbsDimension x="0" y="-20"/>
-						</Offset>
-					</Anchor>
-				</Anchors>
-			</Button>
-		</Frames>
-		<Scripts>
-			<OnLoad>
-				this:RegisterForDrag("LeftButton")
-			</OnLoad>
-			<OnDragStart>
-					if IsShiftKeyDown() then
-						this:StartMoving();
-					end
-			</OnDragStart>
-			<OnDragStop>
-					this:StopMovingOrSizing();
-			</OnDragStop>
-		</Scripts>
-	</Frame>
+	
 </Ui>

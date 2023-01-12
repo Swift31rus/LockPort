@@ -1,30 +1,7 @@
 ## Title: |CFFB700B7L|CFFFF00FFo|CFFFF50FFc|CFFFF99FFk|CFFFFC4FFP|cffffffffort|r
 ## Notes: Warlock Raid Summon Assistant
-## Version: 1.1
-## Author: |cff02bf02Gurky|r
+## Version: 2.0
+## Author: |cff02bf02Bennylava|r
 ## Interface: 11200
 ## SavedVariables: LockPortOptions
-
-Libs\AceLibrary\AceLibrary.lua
-Libs\AceOO-2.0\AceOO-2.0.lua
-Libs\AceAddon-2.0\AceAddon-2.0.lua
-Libs\AceModuleCore-2.0\AceModuleCore-2.0.lua
-Libs\AceDB-2.0\AceDB-2.0.lua
-Libs\AceConsole-2.0\AceConsole-2.0.lua
-Libs\AceEvent-2.0\AceEvent-2.0.lua
-Libs\AceLocale-2.2\AceLocale-2.2.lua
-Libs\AceDebug-2.0\AceDebug-2.0.lua
-Libs\AceHook-2.1\AceHook-2.1.lua
-Libs\Babble-Boss-2.2\Babble-Boss-2.2.lua
-Libs\Babble-Spell-2.2\Babble-Spell-2.2.lua
-Libs\Babble-Zone-2.2\Babble-Zone-2.2.lua
-Libs\Deformat-2.0\Deformat-2.0.lua
-Libs\Gratuity-2.0\Gratuity-2.0.lua
-Libs\SpellCache-1.0\SpellCache-1.0.lua
-Libs\SpellStatus-1.0\SpellStatus-1.0.lua
-Libs\FuBarPlugin-2.0\FuBarPlugin-2.0.lua
-Libs\Tablet-2.0\Tablet-2.0.lua
-Libs\Dewdrop-2.0\Dewdrop-2.0.lua
-
-Locale-enUS.lua
 LockPort.xml

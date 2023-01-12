@@ -1,102 +1,68 @@
 local LockPortOptions_DefaultSettings = {
 	whisper = true,
-	zone = true,
-	zone = true,
-	sound = true,
-	soul = true,
+	zone    = true,
+    shards  = true,
+    debug   = false
 }
 
 local function LockPort_Initialize()
 	if not LockPortOptions  then
-		LockPortOptions = {};
+		LockPortOptions = {}
 	end
-
 	for i in LockPortOptions_DefaultSettings do
 		if (not LockPortOptions[i]) then
-			LockPortOptions[i] = LockPortOptions_DefaultSettings[i];
+			LockPortOptions[i] = LockPortOptions_DefaultSettings[i]
 		end
 	end
 end
 
-local s = CreateFrame("Frame", nil, UIParent)
-s:RegisterEvent("PLAYER_LOGIN")
-s:SetScript("OnEvent", function(self, event)
-		LockPort_Shards()
-		LockPort_NotStoned()
-		LockPortStoneNAME:SetText("NONE")
-
-	CreateFrame("frame"):SetScript("OnUpdate", PopUpMenu_Load)
-end)
-
 function LockPort_EventFrame_OnLoad()
-
-	DEFAULT_CHAT_FRAME:AddMessage(string.format("|CFFB700B7L|CFFFF00FFo|CFFFF50FFc|CFFFF99FFk|CFFFFC4FFP|cffffffffort|r version %s by %s", GetAddOnMetadata("LockPort", "Version"), GetAddOnMetadata("LockPort", "Author")));
-    this:RegisterEvent("VARIABLES_LOADED");
+	DEFAULT_CHAT_FRAME:AddMessage(string.format("|CFFB700B7L|CFFFF00FFo|CFFFF50FFc|CFFFF99FFk|CFFFFC4FFP|cffffffffort|r version %s by %s. Type /lockport to show.", GetAddOnMetadata("LockPort", "Version"), GetAddOnMetadata("LockPort", "Author")))
+    this:RegisterEvent("VARIABLES_LOADED")
     this:RegisterEvent("CHAT_MSG_ADDON")
     this:RegisterEvent("CHAT_MSG_RAID")
 	this:RegisterEvent("CHAT_MSG_RAID_LEADER")
+    this:RegisterEvent("CHAT_MSG_SAY")
     this:RegisterEvent("CHAT_MSG_YELL")
     this:RegisterEvent("CHAT_MSG_WHISPER")
     this:RegisterEvent("CHAT_MSG_PARTY")
-    this:RegisterEvent("CHAT_MSG_SAY")
-    this:RegisterEvent("CHAT_MSG_SPELL_AURA_GONE_OTHER")
-    this:RegisterEvent("CHAT_MSG_SPELL_AURA_GONE_SELF")
-    this:RegisterEvent("CHAT_MSG_COMBAT_FRIENDLY_DEATH")
-    
+    -- Commands
 	SlashCmdList["LockPort"] = LockPort_SlashCommand
-	SLASH_LockPort1 = "/LockPort"
-	
-	MSG_PREFIX_ADD	= "LPAdd"
-	MSG_PREFIX_REMOVE	= "LPRemove"
-	MSG_PREFIX_STONE_ADD	= "LPStoneAdd"
-	MSG_PREFIX_STONE_REMOVE	= "LPStoneRemove"
+	SLASH_LockPort1 = "/lockPort"
+	MSG_PREFIX_ADD		= "RSAdd"
+	MSG_PREFIX_REMOVE	= "RSRemove"
+	MSG_PREFIX_OLD_ADD		= "LPAdd"
+	MSG_PREFIX_OLD_REMOVE	= "LPRemove"
 	LockPortDB = {}
-	LockPortStoneDB = {}
-
+	-- Sync Summon Table between raiders ? (if in raid & raiders with unempty table)
 	--localization
 	LockPortLoc_Header = "|CFFB700B7L|CFFFF00FFo|CFFFF50FFc|CFFFF99FFk|CFFFFC4FFP|cffffffffort|r"
 end
 
 function LockPort_EventFrame_OnEvent()
-	if (event == "PLAYER_LOGIN") then
-	LockPortStoneNAME:SetText("NONE")
-	end
-	if (event == "PLAYER_ENTERING_WORLD") then
-	
-	end
-	if (event == "BAG_UPDATE") then
-		LockPort_Shards()
-	end
-
 	if event == "VARIABLES_LOADED" then
 		this:UnregisterEvent("VARIABLES_LOADED")
 		LockPort_Initialize()
-		LockPort_RequestFrame_Header:SetFont("Fonts\\FRIZQT__.TTF", 10, "OUTLINE, ")
-		
-
-	elseif event == "CHAT_MSG_RAID" or event == "CHAT_MSG_RAID_LEADER" or event == "CHAT_MSG_YELL" or event == "CHAT_MSG_WHISPER" or event == "CHAT_MSG_PARTY" then
-		
-		if string.find(arg1, "123") then
+	elseif event == "CHAT_MSG_SAY" or event == "CHAT_MSG_RAID" or event == "CHAT_MSG_RAID_LEADER" or event == "CHAT_MSG_YELL" or event == "CHAT_MSG_WHISPER" or event == "CHAT_MSG_PARTY" then	
+		if string.find(arg1, "^123") or string.find(arg1, "^summon") or string.find(arg1, "^456") then
 			SendAddonMessage(MSG_PREFIX_ADD, arg2, "RAID")
-		end
-		if string.find(arg1, "summon") then
-			SendAddonMessage(MSG_PREFIX_ADD, arg2, "RAID")
-		end
-		if string.find(arg1, "456") then
-			SendAddonMessage(MSG_PREFIX_ADD, arg2, "RAID")
+			SendAddonMessage(MSG_PREFIX_OLD_ADD, arg2, "RAID")
 		end
 	elseif event == "CHAT_MSG_ADDON" then
-		if arg1 == MSG_PREFIX_ADD and LockPortOptions.sound then
-			if not LockPort_hasValue(LockPortDB, arg2) then
+		if arg1 == MSG_PREFIX_ADD then
+			if not LockPort_hasValue(LockPortDB, arg2) and UnitName("player")~=arg2 then
 				table.insert(LockPortDB, arg2)
 				LockPort_UpdateList()
 				PlaySoundFile("Sound\\Creature\\Necromancer\\NecromancerReady1.wav")
 			end
-		elseif arg1 == MSG_PREFIX_ADD and not LockPortOptions.sound then
-			if not LockPort_hasValue(LockPortDB, arg2) then
+		end
+	elseif event == "CHAT_MSG_ADDON" then
+		if arg1 == MSG_PREFIX_OLD_ADD then
+			if not LockPort_hasValue(LockPortDB, arg2) and UnitName("player")~=arg2 then
 				table.insert(LockPortDB, arg2)
 				LockPort_UpdateList()
 			end
+		end
 		elseif arg1 == MSG_PREFIX_REMOVE then
 			if LockPort_hasValue(LockPortDB, arg2) then
 				for i, v in ipairs (LockPortDB) do
@@ -106,31 +72,15 @@ function LockPort_EventFrame_OnEvent()
 					end
 				end
 			end
-		elseif arg1 == MSG_PREFIX_STONE_ADD then -- Stone Add
-			if strfind(arg2,"LP Character %a+ Soulstoned") then
-				local _,_,soulName =  strfind(arg2,"LP Character (%a+) Soulstoned")
-				LockPort_Stoned()
-				LockPortStoneNAME:SetText(soulName)
-				LPPrint(""..LockPortStoneNAME:GetText().." has been Soulstoned")
-			end
-		elseif arg1 == MSG_PREFIX_STONE_REMOVE then -- Stone Remove
-			if strfind(arg2,"LP Character %a+ Soulstone faded") then
-				local _,_,soulfadedName =  strfind(arg2,"LP Character (%a+) Soulstone faded")
-				LockPort_NotStoned()
-				LockPortStonefadedNAME:SetText(soulfadedName)
-				LockPortStoneNAME:SetText("NONE")
-				LPPrint(""..LockPortStonefadedNAME:GetText().." no longer has a Soulstone.")
+		elseif arg1 == MSG_PREFIX_OLD_REMOVE then
+			if LockPort_hasValue(LockPortDB, arg2) then
+				for i, v in ipairs (LockPortDB) do
+					if v == arg2 then
+						table.remove(LockPortDB, i)
+						LockPort_UpdateList()
+				end
 			end
 		end
-		elseif event == "CHAT_MSG_SPELL_AURA_GONE_OTHER" or event == "CHAT_MSG_SPELL_AURA_GONE_SELF" then -- Stone Fade
-			if string.find(arg1, "Soulstone Resurrection fades from "..LockPortStoneNAME:GetText()..".") then
-				SendAddonMessage(MSG_PREFIX_STONE_REMOVE, "LP Character "..LockPortStoneNAME:GetText().." Soulstone faded", "RAID")
-			end
-		elseif event == "CHAT_MSG_COMBAT_FRIENDLY_DEATH" then -- Stone Fades Player Died
-			if string.find(arg1, ""..LockPortStoneNAME:GetText().." dies.") then
-				LPPrint(LockPortStoneNAME:GetText()) --debug
-				SendAddonMessage(MSG_PREFIX_STONE_REMOVE, "LP Character "..LockPortStoneNAME:GetText().." Soulstone faded", "RAID")
-			end
 	end
 end
 
@@ -143,138 +93,160 @@ function LockPort_hasValue (tab, val)
     return false
 end
 
-function LPPrint(msg)
-	if not msg then msg = "" end
-	DEFAULT_CHAT_FRAME:AddMessage(RED_FONT_COLOR_CODE.."LockPort: "..NORMAL_FONT_COLOR_CODE..msg)
-end
-
 --GUI
 function LockPort_NameListButton_OnClick(button)
-
-	local name = getglobal(this:GetName().."TextName"):GetText();
+	local name = getglobal(this:GetName().."TextName"):GetText()
+	local message, base_message, whisper_message, base_whisper_message, whisper_eviltwin_message, zone_message, subzone_message = ""
+	local bag,slot,texture,count = FindItem("Soul Shard")
+	local eviltwin_debuff = "Spell_Shadow_Charm"
+	local has_eviltwin = false
 
 	if button  == "LeftButton" and IsControlKeyDown() then
-	
-		LockPort_getRaidMembers()
-		
+		LockPort_GetRaidMembers()
 		if LockPort_UnitIDDB then
-		
 			for i, v in ipairs (LockPort_UnitIDDB) do
 				if v.rName == name then
 					UnitID = "raid"..v.rIndex
 				end
 			end
-		
 			if UnitID then
 				TargetUnit(UnitID)
 			end
-			
 		else
-			DEFAULT_CHAT_FRAME:AddMessage("|CFFB700B7L|CFFFF00FFo|CFFFF50FFc|CFFFF99FFk|CFFFFC4FFP|cffffffffort|r - no Raid found")
+			DEFAULT_CHAT_FRAME:AddMessage("|CFFB700B7L|CFFFF00FFo|CFFFF50FFc|CFFFF99FFk|CFFFFC4FFP|cffffffffort|r : no raid found")
 		end
-		
 	elseif button == "LeftButton" and not IsControlKeyDown() then
-	
-		LockPort_getRaidMembers()
-		
+		LockPort_GetRaidMembers()
 		if LockPort_UnitIDDB then
-		
 			for i, v in ipairs (LockPort_UnitIDDB) do
 				if v.rName == name then
 					UnitID = "raid"..v.rIndex
 				end
 			end
-		
 			if UnitID then
 				playercombat = UnitAffectingCombat("player")
 				targetcombat = UnitAffectingCombat(UnitID)
 			
 				if not playercombat and not targetcombat then
-					TargetUnit(UnitID)
-					CastSpellByName("Ritual of Summoning")
-					
-					if LockPortOptions.zone and LockPortOptions.whisper then
-					
-						if GetSubZoneText() == "" then
-							SendChatMessage("Summoning ".. name .. " to "..GetZoneText(), "SAY")
-							SendChatMessage("Summoning you to "..GetZoneText(), "WHISPER", nil, name)
-						else
-							SendChatMessage("Summoning ".. name .. " to "..GetZoneText() .. " - " .. GetSubZoneText(), "SAY")
-							SendChatMessage("Summoning you to "..GetZoneText() .. " - " .. GetSubZoneText(), "WHISPER", nil, name)
+					count = count -1
+					base_message 			= "Summoning " .. name .. ""
+					base_whisper_message    = "Summoning you"
+					zone_message            = " to " .. GetZoneText()
+					subzone_message         = " - " .. GetSubZoneText()
+					shards_message          = " [" .. count .. " shards remaining]"
+					message                 = base_message
+					whisper_message         = base_whisper_message
+
+					-- Evil Twin check
+					for i=1,16 do
+						s=UnitDebuff("target", i)
+						if(s) then
+							if (strfind(strlower(s), strlower(eviltwin_debuff))) then
+						        has_eviltwin = true
+							end
 						end
-					elseif LockPortOptions.zone and not LockPortOptions.whisper then
-						if GetSubZoneText() == "" then
-							SendChatMessage("Summoning ".. name .. " to "..GetZoneText(), "SAY")
-						else
-							SendChatMessage("Summoning ".. name .. " to "..GetZoneText() .. " - " .. GetSubZoneText(), "SAY")
-						end
-					elseif not LockPortOptions.zone and LockPortOptions.whisper then
-						SendChatMessage("Summoning ".. name, "SAY")
-						SendChatMessage("Summoning you", "WHISPER", nil, name)
-					elseif not LockPortOptions.zone and not LockPortOptions.whisper then
-						SendChatMessage("Summoning ".. name, "SAY")
 					end
-					for i, v in ipairs (LockPortDB) do
-						if v == name then
-							SendAddonMessage(MSG_PREFIX_REMOVE, name, "RAID")
+
+					TargetUnit(UnitID)
+
+					if (has_eviltwin) then
+						whisper_eviltwin_message = "Can't summon you because of Evil Twin Debuff, you need either to die or to run by yourself"
+						SendChatMessage(whisper_eviltwin_message, "WHISPER", nil, name)
+						DEFAULT_CHAT_FRAME:AddMessage("|CFFB700B7L|CFFFF00FFo|CFFFF50FFc|CFFFF99FFk|CFFFFC4FFP|cffffffffort|r : <" .. name .. "> has |cffff0000Evil Twin|r !")
+						for i, v in ipairs (LockPortDB) do
+							if v == name then
+								SendAddonMessage(MSG_PREFIX_REMOVE, name, "RAID")
+								SendAddonMessage(MSG_PREFIX_OLD_REMOVE, name, "RAID")
+								table.remove(LockPortDB, i)
+							end
+						end
+					elseif (Check_TargetInRange()) then
+						DEFAULT_CHAT_FRAME:AddMessage("|CFFB700B7L|CFFFF00FFo|CFFFF50FFc|CFFFF99FFk|CFFFFC4FFP|cffffffffort|r : <" .. name .. "> has been summoned already (|cffff0000in range|r)")
+						-- Remove the already summoned target
+						for i, v in ipairs (LockPortDB) do
+							if v == name then
+						    	SendAddonMessage(MSG_PREFIX_REMOVE, name, "RAID")
+								SendAddonMessage(MSG_PREFIX_OLD_REMOVE, name, "RAID")
+						    	table.remove(LockPortDB, i)
+						    	LockPort_UpdateList()
+						    end
+						end
+					else
+						-- TODO: Detect if spell is aborted/cancelled : use SpellStopCasting if sit ("You must be standing to do that")
+						CastSpellByName("Ritual of Summoning")
+
+						-- Send Raid Message
+						if LockPortOptions.zone then
+							if GetSubZoneText() == "" then
+						    	message         = message .. zone_message .. subzone_message
+						    	whisper_message = base_whisper_message .. zone_message .. subzone_message
+							else
+						    	message         = message .. zone_message .. subzone_message
+						    	whisper_message = whisper_message .. zone_message .. subzone_message
+							end
+						end
+						if LockPortOptions.shards then
+					    	message = message .. shards_message
+						end
+						SendChatMessage(message, "RAID")
+
+						-- Send Whisper Message
+						if LockPortOptions.whisper then
+							SendChatMessage(whisper_message, "WHISPER", nil, name)
+						end
+
+						-- Remove the summoned target
+						for i, v in ipairs (LockPortDB) do
+							if v == name then
+						    	SendAddonMessage(MSG_PREFIX_REMOVE, name, "RAID")
+								SendAddonMessage(MSG_PREFIX_OLD_REMOVE, name, "RAID")
+						    	table.remove(LockPortDB, i)
+						    	LockPort_UpdateList()
+						    end
 						end
 					end
 				else
-					DEFAULT_CHAT_FRAME:AddMessage("|CFFB700B7L|CFFFF00FFo|CFFFF50FFc|CFFFF99FFk|CFFFFC4FFP|cffffffffort|r - Player is in combat")
+					DEFAULT_CHAT_FRAME:AddMessage("|CFFB700B7L|CFFFF00FFo|CFFFF50FFc|CFFFF99FFk|CFFFFC4FFP|cffffffffort|r : Player is in combat")
 				end
 			else
-				DEFAULT_CHAT_FRAME:AddMessage("|CFFB700B7L|CFFFF00FFo|CFFFF50FFc|CFFFF99FFk|CFFFFC4FFP|cffffffffort|r - Player " .. tostring(name) .. " not found in raid. UnitID: " .. tostring(UnitID))
+				DEFAULT_CHAT_FRAME:AddMessage("|CFFB700B7L|CFFFF00FFo|CFFFF50FFc|CFFFF99FFk|CFFFFC4FFP|cffffffffort|r : <" .. tostring(name) .. "> not found in raid. UnitID: " .. tostring(UnitID))
 				SendAddonMessage(MSG_PREFIX_REMOVE, name, "RAID")
+				SendAddonMessage(MSG_PREFIX_OLD_REMOVE, name, "RAID")
 				LockPort_UpdateList()
 			end
 		else
-			DEFAULT_CHAT_FRAME:AddMessage("|CFFB700B7L|CFFFF00FFo|CFFFF50FFc|CFFFF99FFk|CFFFFC4FFP|cffffffffort|r - no Raid found")
+			DEFAULT_CHAT_FRAME:AddMessage("|CFFB700B7L|CFFFF00FFo|CFFFF50FFc|CFFFF99FFk|CFFFFC4FFP|cffffffffort|r : no raid found")
 		end
 	elseif button == "RightButton" then
 		for i, v in ipairs (LockPortDB) do
 			if v == name then
 				SendAddonMessage(MSG_PREFIX_REMOVE, name, "RAID")
+				SendAddonMessage(MSG_PREFIX_OLD_REMOVE, name, "RAID")
 				table.remove(LockPortDB, i)
 				LockPort_UpdateList()
 			end
 		end
 	end
-			
 	LockPort_UpdateList()
-end
-
-function LockPort_Stoned()
-		LockPortStoneCross:Hide()
-		LockPortStoneCheck:Show()
-end
-
-function LockPort_NotStoned()
-		LockPortStoneCross:Show()
-		LockPortStoneCheck:Hide()
 end
 
 function LockPort_UpdateList()
 	LockPort_BrowseDB = {}
-
 	--only Update and show if Player is Warlock
 	 if (UnitClass("player") == "Warlock") then
-	 
 		--get raid member data
 		local raidnum = GetNumRaidMembers()
-		if ( raidnum > 0 ) then
+		if (raidnum > 0) then
 			for raidmember = 1, raidnum do
 				local rName, rRank, rSubgroup, rLevel, rClass = GetRaidRosterInfo(raidmember)
-				
 				--check raid data for LockPort data
 				for i, v in ipairs (LockPortDB) do 
-				
 					--if player is found fill BrowseDB
 					if v == rName then
 						LockPort_BrowseDB[i] = {}
 						LockPort_BrowseDB[i].rName = rName
 						LockPort_BrowseDB[i].rClass = rClass
 						LockPort_BrowseDB[i].rIndex = i
-						
 						if rClass == "Warlock" then
 							LockPort_BrowseDB[i].rVIP = true
 						else
@@ -286,7 +258,6 @@ function LockPort_UpdateList()
 
 			--sort warlocks first
 			table.sort(LockPort_BrowseDB, function(a,b) return tostring(a.rVIP) > tostring(b.rVIP) end)
-
 		end
 		
 		for i=1,10 do
@@ -294,7 +265,8 @@ function LockPort_UpdateList()
 				getglobal("LockPort_NameList"..i.."TextName"):SetText(LockPort_BrowseDB[i].rName)
 				getglobal("LockPort_NameList"..i.."TextName"):SetFont("Fonts\\FRIZQT__.TTF", 12, "OUTLINE, ")
 				
-				if LockPort_BrowseDB[i].rClass == "Druid" then --set class color
+				--set class color
+				if LockPort_BrowseDB[i].rClass == "Druid" then
 					local c = LockPort_GetClassColour("DRUID")
 					getglobal("LockPort_NameList"..i.."TextName"):SetTextColor(c.r, c.g, c.b, 1)
 				elseif LockPort_BrowseDB[i].rClass == "Hunter" then
@@ -349,33 +321,30 @@ function LockPort_UpdateList()
 	end	
 end
 
-function LockPort_SlashCommand( msg ) --Slash Handler
-
+--Slash Handler
+function LockPort_SlashCommand(msg)
 	if msg == "help" then
 		DEFAULT_CHAT_FRAME:AddMessage("|CFFB700B7L|CFFFF00FFo|CFFFF50FFc|CFFFF99FFk|CFFFFC4FFP|cffffffffort|r usage:")
-		DEFAULT_CHAT_FRAME:AddMessage("/LockPort { help | show | zone | whisper | sound }")
+		DEFAULT_CHAT_FRAME:AddMessage("/lockport { help | show | zone | whisper | shards | debug }")
 		DEFAULT_CHAT_FRAME:AddMessage(" - |cff9482c9help|r: prints out this help")
-		DEFAULT_CHAT_FRAME:AddMessage(" - |cff9482c9show|r: shows/hides the current summon list")
+		DEFAULT_CHAT_FRAME:AddMessage(" - |cff9482c9show|r: shows the current summon list")
 		DEFAULT_CHAT_FRAME:AddMessage(" - |cff9482c9zone|r: toggles zoneinfo in /ra and /w")
 		DEFAULT_CHAT_FRAME:AddMessage(" - |cff9482c9whisper|r: toggles the usage of /w")
-		DEFAULT_CHAT_FRAME:AddMessage(" - |cff9482c9sound|r: toggles the sound")
-		DEFAULT_CHAT_FRAME:AddMessage("To drag the frame use shift + left mouse button")
-	elseif msg == "show" then -- Show Toggle (/lockport show)
-		if LockPort_RequestFrame:IsVisible() then
-			LockPort_RequestFrame:Hide()
-		else
-			LockPort_UpdateList()
-			ShowUIPanel(LockPort_RequestFrame, 1)
+		DEFAULT_CHAT_FRAME:AddMessage(" - |cff9482c9shards|r: toggles shards count when you announce a summon in /ra")
+		DEFAULT_CHAT_FRAME:AddMessage("To drag the frame use left mouse button")
+	elseif msg == "show" then
+		for i, v in ipairs(LockPortDB) do
+			DEFAULT_CHAT_FRAME:AddMessage(tostring(v))
 		end
 	elseif msg == "zone" then
-		if LockPortOptions["zone"] == true then -- Zone Toggle (/lockport zone)
+		if LockPortOptions["zone"] == true then
 			LockPortOptions["zone"] = false
 			DEFAULT_CHAT_FRAME:AddMessage("|CFFB700B7L|CFFFF00FFo|CFFFF50FFc|CFFFF99FFk|CFFFFC4FFP|cffffffffort|r - zoneinfo: |cffff0000disabled|r")
 		elseif LockPortOptions["zone"] == false then
 			LockPortOptions["zone"] = true
 			DEFAULT_CHAT_FRAME:AddMessage("|CFFB700B7L|CFFFF00FFo|CFFFF50FFc|CFFFF99FFk|CFFFFC4FFP|cffffffffort|r - zoneinfo: |cff00ff00enabled|r")
 		end
-	elseif msg == "whisper" then  -- Whisper Toggle (/lockport whisper)
+	elseif msg == "whisper" then
 		if LockPortOptions["whisper"] == true then
 			LockPortOptions["whisper"] = false
 			DEFAULT_CHAT_FRAME:AddMessage("|CFFB700B7L|CFFFF00FFo|CFFFF50FFc|CFFFF99FFk|CFFFFC4FFP|cffffffffort|r - whisper: |cffff0000disabled|r")
@@ -383,41 +352,34 @@ function LockPort_SlashCommand( msg ) --Slash Handler
 			LockPortOptions["whisper"] = true
 			DEFAULT_CHAT_FRAME:AddMessage("|CFFB700B7L|CFFFF00FFo|CFFFF50FFc|CFFFF99FFk|CFFFFC4FFP|cffffffffort|r - whisper: |cff00ff00enabled|r")
 		end
-	elseif msg == "sound" then -- Sound Toggle (/lockport sound)
-		if LockPortOptions["sound"] == true then
-			LockPortOptions["sound"] = false
-			DEFAULT_CHAT_FRAME:AddMessage("|CFFB700B7L|CFFFF00FFo|CFFFF50FFc|CFFFF99FFk|CFFFFC4FFP|cffffffffort|r - sound: |cffff0000disabled|r")
-		elseif LockPortOptions["sound"] == false then
-			LockPortOptions["sound"] = true
-			DEFAULT_CHAT_FRAME:AddMessage("|CFFB700B7L|CFFFF00FFo|CFFFF50FFc|CFFFF99FFk|CFFFFC4FFP|cffffffffort|r - sound: |cff00ff00enabled|r")
+	 elseif msg == "shards" then
+		if LockPortOptions["shards"] == true then
+	       LockPortOptions["shards"] = false
+	       DEFAULT_CHAT_FRAME:AddMessage("|CFFB700B7L|CFFFF00FFo|CFFFF50FFc|CFFFF99FFk|CFFFFC4FFP|cffffffffort|r - shards: |cffff0000disabled|r")
+		elseif LockPortOptions["shards"] == false then
+	       LockPortOptions["shards"] = true
+	       DEFAULT_CHAT_FRAME:AddMessage("|CFFB700B7L|CFFFF00FFo|CFFFF50FFc|CFFFF99FFk|CFFFFC4FFP|cffffffffort|r - shards: |cff00ff00enabled|r")
 		end
-	elseif msg == "soul" then -- SoulStone Toggle (/lockport soul) Recommended on
-		if LockPortOptions["soul"] == true then
-			LockPortOptions["soul"] = false
-			DEFAULT_CHAT_FRAME:AddMessage("|CFFB700B7L|CFFFF00FFo|CFFFF50FFc|CFFFF99FFk|CFFFFC4FFP|cffffffffort|r - soul: |cffff0000disabled|r")
-		elseif LockPortOptions["soul"] == false then
-			LockPortOptions["soul"] = true
-			DEFAULT_CHAT_FRAME:AddMessage("|CFFB700B7L|CFFFF00FFo|CFFFF50FFc|CFFFF99FFk|CFFFFC4FFP|cffffffffort|r - soul: |cff00ff00enabled|r")
-		end
-	elseif msg == "stone" then -- Stone Frame Toggle (/lockport stone)
-		if LockPort_SoulFrame:IsVisible() then
-			LockPort_SoulFrame:Hide()
-		else
-			LockPort_SoulFrame:Show()
+		elseif msg == "debug" then
+		if LockPortOptions["debug"] == true then
+	       LockPortOptions["debug"] = false
+	       DEFAULT_CHAT_FRAME:AddMessage("|CFFB700B7L|CFFFF00FFo|CFFFF50FFc|CFFFF99FFk|CFFFFC4FFP|cffffffffort|r - debug: |cffff0000disabled|r")
+		elseif LockPortOptions["debug"] == false then
+	       LockPortOptions["debug"] = true
+	       DEFAULT_CHAT_FRAME:AddMessage("|CFFB700B7L|CFFFF00FFo|CFFFF50FFc|CFFFF99FFk|CFFFFC4FFP|cffffffffort|r - debug: |cff00ff00enabled|r")
 		end
 	else
-		if LockPort_RequestFrame:IsVisible() then -- LockPort Frame Toggle (/lockport)
+		if LockPort_RequestFrame:IsVisible() then
 			LockPort_RequestFrame:Hide()
 		else
 			LockPort_UpdateList()
 			ShowUIPanel(LockPort_RequestFrame, 1)
 		end
-	
 	end
-	
 end
 
-function LockPort_GetClassColour(class) -- class color
+--class color
+function LockPort_GetClassColour(class)
 	if (class) then
 		local color = RAID_CLASS_COLORS[class]
 		if (color) then
@@ -427,70 +389,62 @@ function LockPort_GetClassColour(class) -- class color
 	return {r = 0.5, g = 0.5, b = 1}
 end
 
-function LockPort_getRaidMembers() -- raid member
+--raid member
+function LockPort_GetRaidMembers()
     local raidnum = GetNumRaidMembers()
-
-    if ( raidnum > 0 ) then
-	LockPort_UnitIDDB = {};
-
-	for i = 1, raidnum do
-	    local rName, rRank, rSubgroup, rLevel, rClass = GetRaidRosterInfo(i)
-
-		LockPort_UnitIDDB[i] = {}
-		if (not rName) then 
-		    rName = "unknown"..i
-		end
-		
-		LockPort_UnitIDDB[i].rName    = rName
-		LockPort_UnitIDDB[i].rClass    = rClass
-		LockPort_UnitIDDB[i].rIndex   = i
-		
+    if (raidnum > 0) then
+		LockPort_UnitIDDB = {}
+		for i = 1, raidnum do
+		    local rName, rRank, rSubgroup, rLevel, rClass = GetRaidRosterInfo(i)
+			LockPort_UnitIDDB[i] = {}
+			if (not rName) then 
+			    rName = "unknown"..i
+			end
+			LockPort_UnitIDDB[i].rName    = rName
+			LockPort_UnitIDDB[i].rClass   = rClass
+			LockPort_UnitIDDB[i].rIndex   = i
 	    end
 	end
 end
--------------
---Soul Stone
--------------
-function SoulMonitor_OnEvent(event, arg1, arg2) -- Soul Stone Casted
-   if (LockPortOptions.soul and (event == "SPELLCAST_START")) then
-     if ((arg1 == "Soulstone Resurrection") and LockPortOptions.soul) then
-		SendChatMessage("I am saving %t's soul in a soulstone.", "SAY")
-		SendChatMessage("You have been Soul Stoned.", "WHISPER", nil, GetUnitName("target"))
-		SendAddonMessage(MSG_PREFIX_STONE_ADD, "LP Character "..GetUnitName("target").." Soulstoned", "RAID")
-	   end
+
+-- FindItem function from SuperMacro to get the total number of Soul Shards
+function FindItem(item)
+	if (not item) then return end
+	item = string.lower(ItemLinkToName(item))
+	local link
+	for i = 1,23 do
+       link = GetInventoryItemLink("player",i)
+       if (link) then
+           if (item == string.lower(ItemLinkToName(link))) then
+                return i, nil, GetInventoryItemTexture('player', i), GetInventoryItemCount('player', i)
+           end
+       end
+	end
+	local count, bag, slot, texture
+	local totalcount = 0
+	for i = 0,NUM_BAG_FRAMES do
+       for j = 1,MAX_CONTAINER_ITEMS do
+           link = GetContainerItemLink(i,j)
+           if (link) then
+               if (item == string.lower(ItemLinkToName(link))) then
+	               bag, slot = i, j
+	               texture, count = GetContainerItemInfo(i,j)
+	               totalcount = totalcount + count
+               end
+           end
+       end
+	end
+	return bag, slot, texture, totalcount
+end
+
+-- Checks if the target is in range (28 yards)
+function Check_TargetInRange()
+   if not (GetUnitName("target")==nil) then
+       local t = UnitName("target")
+       if (CheckInteractDistance("target", 4)) then
+           return true
+       else
+           return false
+       end
    end
 end
-
-function LockPort_Shards() -- Shard Counter
-	i=1; 
-	for bag = 0,4,1 do 
-		for slot = 1, GetContainerNumSlots(bag), 1 do 
-			local name = GetContainerItemLink(bag,slot); 
-			if name and string.find(name,"Soul Shard") then 
-				LockPortShardCount:SetText(i);
-				LockPortShardCount:SetTextColor(1.0, 0.55, 0.0);
-				LockPortShardCount:SetFont("Fonts\\FRIZQT__.TTF", 18, "OUTLINE, ")
-				i=i+1; 
-			end
-		end
-	end
-end
-
-local f = CreateFrame'Frame' -- Events to listen for:
-f:RegisterEvent'BAG_UPDATE'
-f:RegisterEvent'PLAYER_REGEN_ENABLED'
-f:RegisterEvent("PLAYER_LOGIN")
-
-local combat, bag = nil, nil -- Check if something is in the bags and check if player exited combat.
-f:SetScript('OnEvent', function()
-	if event == "BAG_UPDATE" then
-		bag = true
-	elseif event == "PLAYER_REGEN_ENABLED" then
-		combat = true
-	end
-
-	if bag and combat then
-		bag, combat = nil, nil
-		LockPort_Shards();
-	end
-end)

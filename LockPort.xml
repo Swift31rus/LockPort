@@ -85,7 +85,47 @@
 		</Anchors>
 	</Button>
 
+	<Button name="LockPort_SettingsButton_Template" virtual="true">
+		<Size>
+			<AbsDimension x="12" y="12"/>
+		</Size>
+		<Anchors>
+			<Anchor point="LEFT">
+				<Offset>
+					<AbsDimension x="5" y="0"/>
+				</Offset>
+			</Anchor>
+		</Anchors>
+	</Button>
+
+	<Button name="LockPort_SettingsMenu_TitleButton_Template" virtual="true">
+		<Size>
+			<AbsDimension x="12" y="12"/>
+		</Size>
+		<Anchors>
+			<Anchor point="RIGHT">
+				<Offset>
+					<AbsDimension x="-5" y="0"/>
+				</Offset>
+			</Anchor>
+		</Anchors>
+	</Button>
+
 	<Font name="LockPort_GameFontHeader" font="Interface\AddOns\LockPort\fonts\Expressway.ttf" virtual="true">
+		<FontHeight>
+			<AbsValue val="14"/>
+		</FontHeight>
+		<Color r="1" g="1" b="1"/>
+	</Font>
+
+	<Font name="LockPort_Settings_GameFontHeader" font="Interface\AddOns\LockPort\fonts\Expressway.ttf" virtual="true">
+		<FontHeight>
+			<AbsValue val="16"/>
+		</FontHeight>
+		<Color r="1" g="1" b="1"/>
+	</Font>
+	
+	<Font name="LockPort_Settings_GameFontNormal" font="Interface\AddOns\LockPort\fonts\Expressway.ttf" virtual="true">
 		<FontHeight>
 			<AbsValue val="12"/>
 		</FontHeight>
@@ -157,21 +197,14 @@
 						<HighlightTexture file="Interface\AddOns\LockPort\img\close" alphaMode="ADD"/>
 					</Button>
 
-					<Button name="LockPort_SettingsButton" inherits="LockPort_TitleButton_Template" hidden="true">
+					<Button name="LockPort_SettingsButton" inherits="LockPort_SettingsButton_Template">
 						<Scripts>
 							<OnClick>
-								<!-- LockPort_RequestFrame:Show() -->
+								LockPort_Settings_Toggle()
 							</OnClick>
 						</Scripts>
 						<NormalTexture file="Interface\AddOns\LockPort\img\settings"/>
 						<HighlightTexture file="Interface\AddOns\LockPort\img\settings" alphaMode="ADD"/>
-						<Anchors>
-							<Anchor point="RIGHT" relativeTo="LockPort_CloseButton" relativePoint="LEFT">
-								<Offset>
-									<AbsDimension x="-2"/>
-								</Offset>
-							</Anchor>
-						</Anchors>
 					</Button>
 				</Frames>
 			</Frame>
@@ -329,5 +362,4 @@
 			</OnDragStop>
 		</Scripts>
 	</Frame>
-	
 </Ui>

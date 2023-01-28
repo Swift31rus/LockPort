@@ -2,7 +2,7 @@
 
 ## Requirments
 
-- SuperMacro https://github.com/Monteo/SuperMacro
+- Be a Warlock!
 
 ## How it works:
 
@@ -32,4 +32,3 @@
 
 ## How it looks:
 
-![image](https://user-images.githubusercontent.com/90982783/212180872-79592841-dbf2-46af-94d1-13d7f4da4348.png)

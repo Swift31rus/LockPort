@@ -448,6 +448,12 @@ function FindItem(item)
 	return bag, slot, texture, totalcount
 end
 
+function ItemLinkToName(link)
+	if ( link ) then
+   	return gsub(link,"^.*%[(.*)%].*$","%1");
+	end
+end
+
 -- Checks if the target is in range (28 yards)
 function Check_TargetInRange()
    if not (GetUnitName("target")==nil) then
